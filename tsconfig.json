@@ -17,5 +17,5 @@
     "baseUrl": "./",  
    
   },
-  "exclude": ["node_modules", "tmp", "dist","test"]
+  "exclude": ["node_modules", "tmp", "dist","doc"]
 }
