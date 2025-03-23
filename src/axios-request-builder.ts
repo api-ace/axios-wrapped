@@ -12,6 +12,12 @@ export class AxiosRequestBuilder extends BaseRequestBuilder {
     this.init(instance);
   }
 
+  /**
+ * Builds and returns an executable object for making HTTP requests.
+ * The object contains an `execute` method to perform the request.
+ * 
+ * @returns {IExecutable} An object with an `execute` method to perform the HTTP request.
+ */
   public build<TRes = any>(): IExecutable<TRes> {
     let url = this.url;
     if (!isNilOrEmpty(this.endpoint)) {
@@ -88,6 +94,11 @@ export class AxiosRequestBuilder extends BaseRequestBuilder {
     return data as TRes;
   }
 
+  /**
+ * Retrieves the Axios instance used for making HTTP requests.
+ * 
+ * @returns {AxiosInstance} The Axios instance.
+ */
   public getInstance(): AxiosInstance {
     return this.instance;
   }
