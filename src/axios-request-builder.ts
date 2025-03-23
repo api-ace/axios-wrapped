@@ -1,12 +1,15 @@
 import { IExecutable } from "./interfaces";
-import { axios, BaseRequestBuilder } from "./lib";
+import { axios, AxiosInstance, BaseRequestBuilder } from "./lib";
 import { isNil, isNilOrEmpty, mapToObject } from "./utils";
 
 const PARAM_PREFIX = ":";
 
 export class AxiosRequestBuilder extends BaseRequestBuilder {
-  constructor(url?: string) {
+  private instance: AxiosInstance;
+
+  constructor(url?: string, instance?: AxiosInstance) {
     super(url);
+    this.init(instance);
   }
 
   public build<TRes = any>(): IExecutable<TRes> {
@@ -19,12 +22,12 @@ export class AxiosRequestBuilder extends BaseRequestBuilder {
     }
     const headers = mapToObject(this.headers);
     const queryParams = mapToObject(this.query);
-    const instance = axios.create();
+
     const execute = async (): Promise<TRes> => {
       let data = null;
       let retry = false;
       try {
-        const response = await instance.request({
+        const response = await this.instance.request({
           url,
           method: this.method.toString(),
           headers: headers,
@@ -63,10 +66,10 @@ export class AxiosRequestBuilder extends BaseRequestBuilder {
     for (const [key, value] of this.params) {
       url = url.replace(PARAM_PREFIX + key, value);
     }
-    const instance = axios.create();
+
     let data = null;
     try {
-      const response = await instance.request({
+      const response = await this.instance.request({
         url,
         method: this.method.toString(),
         headers: mapToObject(this.headers),
@@ -85,4 +88,11 @@ export class AxiosRequestBuilder extends BaseRequestBuilder {
     return data as TRes;
   }
 
+  public getInstance(): AxiosInstance {
+    return this.instance;
+  }
+
+  private init(instance?: AxiosInstance): void {
+    this.instance = instance ?? axios.create();
+  }
 }

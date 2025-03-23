@@ -2,7 +2,7 @@ import { EHttpMethod } from "../../enums";
 import { TypeMismatchException } from "../../exceptions";
 import { IExecutable, IHookResult, IKeyValue, IRequestBuilder } from "../../interfaces";
 import { EMPTY_STR, filter, first, isArray, isEmpty, isNil, isNilOrEmpty, isObject, map } from "../../utils";
-import { AxiosError } from "../axios";
+import { AxiosError, AxiosInstance } from "../axios";
 
 const CONTENT_TYPE = "content-type";
 
@@ -267,6 +267,7 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
   }
 
   public abstract build<TRes = any>(): IExecutable<TRes>;
+  public abstract getInstance(): AxiosInstance;
 
   protected initialize(): void {
     this.url = null;

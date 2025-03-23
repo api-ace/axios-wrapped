@@ -1,5 +1,5 @@
 import { EHttpMethod } from "../enums";
-import { AxiosError } from "../lib";
+import { AxiosError, AxiosInstance } from "../lib";
 import { IExecutable } from "./i-executable";
 import { IHookResult } from "./i-hook-result";
 import { IKeyValue } from "./i-key-value";
@@ -61,4 +61,5 @@ export interface IRequestBuilder {
   addOnErrorHook(fn: (error: any, builder: IRequestBuilder, nextRetry?: boolean) => Promise<IHookResult>): IRequestBuilder;
 
   build<TRes = any>(): IExecutable<TRes>;
+  getInstance(): AxiosInstance
 }
