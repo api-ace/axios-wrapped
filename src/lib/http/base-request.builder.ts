@@ -259,6 +259,7 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
     return this;
   }
 
+  // TODO: use better approach for retry logic :3 
   public addOnErrorHook<TRes>(fn: (error: AxiosError<TRes> | Error, builder: IRequestBuilder, nextRetry?: boolean) => Promise<IHookResult>): IRequestBuilder {
     this.errorHooks.push(fn);
     return this;
