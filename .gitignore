@@ -2,3 +2,5 @@ node_modules
 .vscode
 dist
 docs
+tsconfig.tsbuildinfo
+.rollup.cache

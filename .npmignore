@@ -1,0 +1,9 @@
+src/
+*.log
+.gitignore
+rollup.config.js
+tsconfig.json
+node_modules/
+gulpfile.js
+webpack.config.js
+webpack.*.js
