@@ -1,169 +1,201 @@
+# Axios Wrapped
 
-
-# Axios Request Builder 🚀
+[![npm version](https://img.shields.io/npm/v/axios-wrapped.svg?style=flat-square)](https://www.npmjs.com/package/axios-wrapped)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg?style=flat-square)](https://www.typescriptlang.org/)
+<!-- [![Star on GitHub](https://img.shields.io/github/stars/your-repo.svg?style=social)](https://github.com/axios-wrapped) -->
 
 A fluent, chainable HTTP client builder for Node.js and browsers, powered by Axios. Perfect for crafting API requests with elegance and precision.
 
 ## Features ✨
 
-- **Fluent Interface**: Chain methods for clean, readable request configuration.
-- **Full TypeScript Support**: Type-safe methods and generics.
-- **Advanced Hooks**: Success/error handlers with retry capabilities.
-- **Flexible Configuration**: Easily set headers, params, query params, and bodies.
-- **Smart Retries**: Automatic retry logic with request modification.
+- **Fluent Interface** - Chain methods for clean, readable request configuration
+- **TypeScript First** - Full type safety with generics support
+- **Advanced Hooks** - Custom success/error handlers with retry capabilities
+- **Flexible Configuration** - Set headers, params, query params, and bodies with ease
+- **Smart Retries** - Automatic retry logic with request modification
+- **Multiple Formats** - Support for Dates, Objects, Maps and Arrays in headers/params
 
 ## Installation 📦
 
-```
-npm install axios-request-builder
+```bash
+npm install axios-wrapped
 ```
 
 ## Quick Start ⚡
 
 ### Basic GET Request
 
-```
-const { AxiosRequestBuilder, EHttpMethod } = require("axios-request-builder");
-
+```typescript
+import { AxiosRequestBuilder, EHttpMethod } from 'axios-wrapped';
 
 const response = await new AxiosRequestBuilder("https://api.example.com")
-.setMethod(EHttpMethod.Get)
-.setEndpoint("/users")
-.addQueryParam("page", 1)
-.build()
-.execute();
+  .setMethod(EHttpMethod.Get)
+  .setEndpoint("/users")
+  .addQueryParam("page", 1)
+  .build()
+  .execute();
 
-console.log(response);
+console.log(response.data);
 ```
 
-## Core Concepts
+## Core Concepts 🧠
 
 ### Method Chaining
 
-Build requests through sequential method calls:
+Build requests through intuitive method chaining:
 
-```
-builder
-.setMethod(EHttpMethod.Post)
-.setContentType("application/json")
-.addHeader("Authorization", "Bearer token")
-.setBody({ data: "payload" });
+```typescript
+const request = new AxiosRequestBuilder("https://api.example.com")
+  .setMethod(EHttpMethod.Post)
+  .setContentType("application/json")
+  .addHeader("Authorization", `Bearer ${token}`)
+  .setBody({ title: "New Post" });
 ```
 
 ### Hooks System
 
-Handle outcomes and implement retry logic:
+Handle outcomes with hooks:
 
-```
+```typescript
 .addOnSuccessHook((response) => {
-    console.log("Success!", response.status);
-    return response
+  console.log("Success! Status:", response);
+  return response;
 })
-.addOnErrorHook((error, builder) => {
-    console.error("Attempt failed");
-    return { retry: true }; // request will be sent again!
+.addOnErrorHook(async (error, builder) => {  
+    await refreshToken();
+    builder.addHeader("Authorization", `Bearer ${newToken}`);
+    return { retry: true };
 });
-
 ```
 
-## Full Usage Guide 📖
+## Comprehensive Usage Guide 📖
 
-### Creating Requests
+### Request Configuration
 
+| Method               | Description                          | Example                                  |
+|----------------------|--------------------------------------|------------------------------------------|
+| `.setUrl()`          | Set base URL                         | `.setUrl("https://new.api")`             |
+| `.setEndpoint()`     | Set API endpoint path                | `.setEndpoint("/users/123")`             |
+| `.setMethod()`       | Set HTTP method                      | `.setMethod(EHttpMethod.Patch)`          |
+| `.setContentType()`  | Set Content-Type header shortcut     | `.setContentType("application/json")`    |
+
+### Headers Management
+
+```typescript
+// Single header
+.addHeader("X-API-Key", "12345")
+
+// Multiple headers
+.setHeaders({
+  "Accept": "application/json",
+  "X-Request-ID": uuidv4()
+})
+
+// Key-value pairs array
+.setHeaders([{
+  key:"my-key",
+  value:"myValue"
+}])
+
+// Special types
+.addHeader("Expires", new Date()) // Auto-converted to ISO string
+.addHeader("Retry-After", 120) // Number converted to string
 ```
-const builder = new AxiosRequestBuilder(baseURL)
-.setMethod(httpMethod)
-.setEndpoint(endpoint);
+
+### Query Parameters
+
+```typescript
+// Single parameter
+.addQueryParam("page", 2)
+
+// Multiple values
+.addQueryParam("fields", ["id", "name", "email"])
+
+// Date handling
+.addQueryParam("createdBefore", new Date(), date => date.toISOString())
 ```
 
-### Configuration Methods
+### Request Body
 
-| Method            | Description           | Example                           |
-|-------------------|-----------------------|-----------------------------------|
-| `.setUrl()`       | Set base URL          | `.setUrl("https://new.api")`      |
-| `.setEndpoint()`  | API endpoint          | `.setEndpoint("/posts")`          |
-| `.addHeader()`    | Add/modify header     | `.addHeader("X-API-Key", "12345")`|
-| `.addQueryParam()`| Add URL query param   | `.addQueryParam("page", 2)`       |
-| `.setBody()`      | Set request body      | `.setBody({ title: "Hello" })`    |
-| `.setContentType()`| Content-Type shortcut| `.setContentType("text/xml")`     |
-
-### Full CRUD Example
-
-#### Create Post
-
-```
-const newPost = await new AxiosRequestBuilder("https://api.example.com")
-.setMethod(EHttpMethod.Post)
-.setEndpoint("/posts")
+```typescript
 .setBody({
+  title: "New Post",
+  content: "Lorem ipsum...",
+  tags: ["tech", "javascript"]
+})
+```
+
+## Advanced Examples 🚀
+
+### CRUD Operations
+
+**Create Resource:**
+```typescript
+const newPost = await new AxiosRequestBuilder("https://api.example.com")
+  .setMethod(EHttpMethod.Post)
+  .setEndpoint("/posts")
+  .setBody({
     title: "New Post",
     content: "Lorem ipsum..."
-})
-.addHeader("Authorization", "Bearer abc123")
-.build()
-.execute();
-
+  })
+  .addHeader("Authorization", `Bearer ${token}`)
+  .build()
+  .execute();
 ```
 
-#### Update with Retry Logic
-
-```
-const updated = await new AxiosRequestBuilder("https://api.example.com")
-.setMethod(EHttpMethod.Patch)
-.setEndpoint("/posts/123")
-.setBody({ title: "Updated Title" })
-.addOnErrorHook( async (error,b) => ({
-    b.addHeader("Retry-Attempt", retries)
-    // or refresh your auth token here !
-    return { retry: true }
-}))
-.build()
-.execute();
-
-```
-
-## Advanced Features
-
-### Date Handling
-
-```JS
-.addQueryParam("createdBefore", new Date(), date => date.toISOString());  // provide your date format function or convert default to ISO string
+**Update with Retry:**
+```typescript
+const updatedPost = await new AxiosRequestBuilder(apiUrl)
+  .setMethod(EHttpMethod.Patch)
+  .setEndpoint(`/posts/${postId}`)
+  .setBody({ title: "Updated Title" })
+  .addOnErrorHook(async (error, builder) => {
+    if (error.response?.status === 429) {
+      await delay(1000);
+      builder.addHeader("X-Retry-Attempt", retryCount++);
+      return { retry: retryCount <= 3 };
+    }
+    return { retry: false };
+  })
+  .build()
+  .execute();
 ```
 
-### Bulk Header Operations
+### Type-Safe Responses (TypeScript)
 
-```
-.setHeaders({
-"X-Client": "WebApp",
-"Accept-Language": "en-US"
-});
-```
-
-### Type-Safe Responses
-
-```
+```typescript
 interface User {
-id: number;
-name: string;
+  id: number;
+  name: string;
+  email: string;
 }
 
-const response = await builder.build<User>().execute();
-console.log(response.name); // Auto-complete works
+const user = await new AxiosRequestBuilder(apiUrl)
+  .setMethod(EHttpMethod.Get)
+  .setEndpoint("/users/123")
+  .build<User>()
+  .execute();
 
+console.log(user.data.name); // Type-safe access
 ```
 
 ## Error Handling
 
-Implement smart retry strategies:
+### Retry Strategies
 
-```
+```typescript
 .addOnErrorHook((error, builder) => {
-    if(error.response?.status === 429) {
-        b => b.addHeader("RateLimit-Backoff", "1s")
-        return { retry: true };
-    }
-
+  // Retry on network errors
+  if (!error.response) {
+    return { retry: true };
+  }
+  
+  // Don't retry on client errors
+  if (error.response.status >= 400 && error.response.status < 500) {
     return { retry: false };
+  }
+  
 });
 ```
 
@@ -171,26 +203,54 @@ Implement smart retry strategies:
 
 ### Exported Members
 
-- `AxiosRequestBuilder`: Main builder class.
-- `EHttpMethod`: Enum of HTTP methods (`Get`, `Post`, `Put`, etc.).
+```typescript
+AxiosRequestBuilder // Main builder class
+EHttpMethod // Enum: Get, Post, Put, Delete, Patch, etc.
+```
 
 ### Core Methods
 
-| Method              | Chainable | Description               |
-|---------------------|-----------|---------------------------|
-| `.setMethod()`      | ✓         | Set HTTP method           |
-| `.addHeader()`      | ✓         | Add single header         |
-| `.addQueryParam()`  | ✓         | Add URL query parameter   |
-| `.setBody()`        | ✓         | Set request payload       |
-| `.addOnSuccessHook()`| ✓        | Add success handler       |
-| `.addOnErrorHook()` | ✓         | Add error handler         |
-| `.build()`          | ✗         | Finalize configuration    |
-| `.execute()`        | ✗         | Send request (returns Promise)|
+| Method               | Chainable | Description                              |
+|----------------------|-----------|------------------------------------------|
+| `.setMethod()`       | ✓         | Set HTTP method                          |
+| `.setEndpoint()`     | ✓         | Set API endpoint path                    |
+| `.addHeader()`       | ✓         | Add/modify single header                 |
+| `.setHeaders()`      | ✓         | Set multiple headers at once             |
+| `.addQueryParam()`   | ✓         | Add URL query parameter                  |
+| `.setBody()`         | ✓         | Set request payload                      |
+| `.addOnSuccessHook()`| ✓         | Add success callback                     |
+| `.addOnErrorHook()`  | ✓         | Add error handler with retry capability  |
+| `.build()`           | ✗         | Finalize configuration                   |
+| `.execute()`         | ✗         | Send request (returns Promise)           |
+
+## Best Practices
+
+1. **Reusable Builders:**
+```typescript
+function createAuthRequest(baseUrl: string, token: string) {
+  return new AxiosRequestBuilder(baseUrl)
+    .addHeader("Authorization", `Bearer ${token}`)
+    .setContentType("application/json");
+}
+```
+
+2. **Request Templates:**
+```typescript
+const jsonRequest = (url: string) => 
+  new AxiosRequestBuilder(url)
+    .setContentType("application/json")
+    .addHeader("Accept", "application/json");
+```
+
+3. **Centralized Error Handling:**
+```typescript
+function withDefaultRetry(builder: AxiosRequestBuilder) {
+  return builder.addOnErrorHook((error) => ({
+    retry: error.response?.status === 503
+  }));
+}
+```
 
 ## License 📄
 
-MIT © [Your Name]
-
----
-
-> **Note**: Replace placeholder values (author, license info) with your actual project details before publishing.
+MIT © [Sahil Multani]
