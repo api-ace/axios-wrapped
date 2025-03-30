@@ -3,7 +3,6 @@
 [![npm version](https://img.shields.io/npm/v/axios-wrapped.svg?style=flat-square)](https://www.npmjs.com/package/axios-wrapped)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg?style=flat-square)](https://www.typescriptlang.org/)
-<!-- [![Star on GitHub](https://img.shields.io/github/stars/your-repo.svg?style=social)](https://github.com/axios-wrapped) -->
 
 A fluent, chainable HTTP client builder for Node.js and browsers, powered by Axios. Perfect for crafting API requests with elegance and precision.
 
@@ -32,7 +31,6 @@ import { AxiosRequestBuilder, EHttpMethod } from 'axios-wrapped';
 const response = await new AxiosRequestBuilder("https://api.example.com")
   .setMethod(EHttpMethod.Get)
   .setEndpoint("/users")
-  .addQueryParam("page", 1)
   .build()
   .execute();
 

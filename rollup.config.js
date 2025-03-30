@@ -1,140 +1,61 @@
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
-import { terser } from "rollup-plugin-terser";
 import json from '@rollup/plugin-json';
-import { babel } from '@rollup/plugin-babel';
-import autoExternal from 'rollup-plugin-auto-external';
-import bundleSize from 'rollup-plugin-bundle-size';
-import aliasPlugin from '@rollup/plugin-alias';
 import typescript from '@rollup/plugin-typescript';
+import { terser } from 'rollup-plugin-terser';
+import { dts } from "rollup-plugin-dts";
+import { babel } from '@rollup/plugin-babel';
+import nodePolyfills from 'rollup-plugin-polyfill-node';
+import autoExternal from "rollup-plugin-auto-external";
 
-import path from 'path';
-
-const lib = require("./package.json");
-const outputFileName = 'axios-wrapped';
-const name = "axios-wrapped";
-const namedInput = './src/index.ts';
-const defaultInput = './src/index.ts';
-
-const buildConfig = ({ es5, browser = true, minifiedVersion = true, alias, ...config }) => {
-  const { file } = config.output;
-  const ext = path.extname(file);
-  const basename = path.basename(file, ext);
-  const extArr = ext.split('.');
-  extArr.shift();
-
-
-  const build = ({ minified }) => ({
-    input: namedInput,
-    ...config,
-    output: {
-      ...config.output,
-      file: `${path.dirname(file)}/${basename}.${(minified ? ['min', ...extArr] : extArr).join('.')}`
-    },
-    plugins: [
-      aliasPlugin({
-        entries: alias || []
-      }),
-      typescript({ declarationDir: `${path.dirname(file)}/types`, outputToFilesystem: false }),
-      json(),
-      resolve({ browser }),
-      commonjs(),
-      minified && terser(),
-      minified && bundleSize(),
-      ...(es5 ? [babel({
-        babelHelpers: 'bundled',
-        presets: ['@babel/preset-env']
-      })] : []),
-      ...(config.plugins || []),
-    ]
-  });
-
-  const configs = [
-    build({ minified: false }),
-  ];
-
-  if (minifiedVersion) {
-    configs.push(build({ minified: true }))
-  }
-
-  return configs;
-};
-
-export default async () => {
-  const year = new Date().getFullYear();
-  const banner = `/*! Axios v${lib.version} Copyright (c) ${year} ${lib.author} and contributors */`;
-
-  return [
-    // browser ESM bundle for CDN
-    ...buildConfig({
-      input: namedInput,
-      output: {
-        file: `dist/esm/${outputFileName}.js`,
-        format: "esm",
-        preferConst: true,
-        exports: "named",
-        banner
-      }
-    }),
-    // browser ESM bundle for CDN with fetch adapter only
-    // Downsizing from 12.97 kB (gzip) to 12.23 kB (gzip)
-    /*    ...buildConfig({
-          input: namedInput,
-          output: {
-            file: `dist/esm/${outputFileName}-fetch.js`,
-            format: "esm",
-            preferConst: true,
-            exports: "named",
-            banner
-          },
-          alias: [
-            { find: './xhr.js', replacement: '../helpers/null.js' }
-          ]
-        }),*/
-
-    // Browser UMD bundle for CDN
-    ...buildConfig({
-      input: defaultInput,
-      es5: true,
-      output: {
-        file: `dist/${outputFileName}.js`,
-        name,
-        format: "umd",
-        exports: "named",
-        banner
-      }
-    }),
-
-    // Browser CJS bundle
-    ...buildConfig({
-      input: defaultInput,
-      es5: false,
-      minifiedVersion: false,
-      output: {
-        file: `dist/browser/${name}.cjs`,
-        name,
-        format: "cjs",
-        exports: "named",
-        banner
-      }
-    }),
-
-    // Node.js commonjs bundle
+const jsConfig = {
+  input: 'src/index.ts',
+  output: [
     {
-      input: defaultInput,
-      output: {
-        file: `dist/node/${name}.cjs`,
-        format: "cjs",
-        preferConst: true,
-        exports: "named",
-        banner
-      },
-      plugins: [
-        autoExternal(),
-        typescript({ declarationDir: `dist/node/types`, outputToFilesystem: false }),
-        resolve(),
-        commonjs()
+      file: 'dist/index.mjs',
+      format: 'esm',
+      sourcemap: true,
+    },
+    {
+      file: 'dist/index.cjs',
+      format: 'cjs',
+      sourcemap: true,
+    },
+    {
+      file: "dist/index.min.js",
+      format: "umd",
+      exports: "named",
+      name: "axiosWrapped",
+      globals: { 'axios': "axios" },
+      plugins:[
+        resolve({browser:true}),    
       ]
-    }
-  ]
+    },
+  ],
+  plugins: [
+    autoExternal(),
+    resolve(),
+    commonjs(),
+    json(),
+    nodePolyfills(),
+    terser(),
+    typescript({
+      tsconfig: "./tsconfig.json",
+      declaration: false, // Prevents only emitting types
+      outDir: "dist", // Ensures output goes to dist
+      sourceMap: true,
+    }),
+  ],
+  external: ['axios']
 };
+
+const dtsConfig = {
+  input: 'src/index.ts',
+  output: {
+    file: 'dist/index.d.ts',
+    format: 'es', // Ensure the output format is ES module
+  },
+  plugins: [dts()],
+};
+
+export default [jsConfig, dtsConfig];
