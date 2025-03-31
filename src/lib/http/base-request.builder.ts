@@ -126,6 +126,7 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
     return this.params.has(name);
   }
 
+  // really ? do devs actually need it ???
   public addParam(name: string, value: string | number | boolean): IRequestBuilder;
   public addParam(name: string, date: Date, formater?: (date: Date) => string): IRequestBuilder;
   public addParam(param: IKeyValue): IRequestBuilder;
