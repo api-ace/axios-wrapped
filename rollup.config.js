@@ -4,7 +4,6 @@ import json from '@rollup/plugin-json';
 import typescript from '@rollup/plugin-typescript';
 import { terser } from 'rollup-plugin-terser';
 import { dts } from "rollup-plugin-dts";
-import { babel } from '@rollup/plugin-babel';
 import nodePolyfills from 'rollup-plugin-polyfill-node';
 import autoExternal from "rollup-plugin-auto-external";
 
@@ -27,24 +26,26 @@ const jsConfig = {
       exports: "named",
       name: "axiosWrapped",
       globals: { 'axios': "axios" },
-      plugins:[
-        resolve({browser:true}),    
-      ]
+      sourcemap: true,
     },
   ],
   plugins: [
     autoExternal(),
-    resolve(),
+    resolve({
+      browser: true,
+      preferBuiltins: true
+    }),
     commonjs(),
     json(),
     nodePolyfills(),
-    terser(),
     typescript({
+      outputToFilesystem:true,
       tsconfig: "./tsconfig.json",
-      declaration: false, // Prevents only emitting types
-      outDir: "dist", // Ensures output goes to dist
-      sourceMap: true,
+      declaration: false, // Enable declaration generation
+      outDir: "dist",
+      sourceMap: true, // Enable source maps to match output config
     }),
+    terser(),
   ],
   external: ['axios']
 };
@@ -53,9 +54,11 @@ const dtsConfig = {
   input: 'src/index.ts',
   output: {
     file: 'dist/index.d.ts',
-    format: 'es', // Ensure the output format is ES module
+    format: 'es', 
   },
-  plugins: [dts()],
+  plugins: [dts({
+    tsconfig: "./tsconfig.json"
+  })],
 };
 
 export default [jsConfig, dtsConfig];

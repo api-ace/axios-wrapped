@@ -2,9 +2,8 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "./src",
-    "declarationDir": "./dist/types",
     "sourceMap": true,
-    "declaration": true,
+    "declaration": false,
     "emitDeclarationOnly": false,
     "declarationMap": false,
     "stripInternal": true,
@@ -17,6 +16,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
     "incremental": true,
     "lib": [
       "ESNext"
