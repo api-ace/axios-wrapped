@@ -3,13 +3,15 @@ import { describe, it, beforeEach, afterEach } from 'mocha';
 import { AxiosRequestBuilder, EHttpMethod } from '../../src/index.js';
 import axios, { AxiosRequestConfig } from 'axios';
 import sinon from 'sinon';
+import { IKeyValue } from '../../src/interfaces/i-key-value.js';
 
 describe('AxiosRequestBuilder', () => {
   const BASE_URL = 'https://api.example.com';
   let builder: AxiosRequestBuilder;
+  const instance = axios.create()
 
   beforeEach(() => {
-    builder = new AxiosRequestBuilder(BASE_URL);
+    builder = new AxiosRequestBuilder(BASE_URL, instance);
   });
 
   describe('Initialization', () => {
@@ -88,8 +90,16 @@ describe('AxiosRequestBuilder', () => {
     it('should add and get parameter', () => {
       const paramName = 'id';
       const paramValue = '123';
+
+      const keyValueParams: IKeyValue = {
+        key: 'userId',
+        value: '345'
+      }
+
       builder.addParam(paramName, paramValue);
+      builder.addParam(keyValueParams)
       expect(builder.getParam(paramName)).to.equal(paramValue);
+      expect(builder.getParam('userId')).to.equal('345')
     });
 
     it('should check if parameter exists', () => {
@@ -111,9 +121,16 @@ describe('AxiosRequestBuilder', () => {
         id: '123',
         type: 'user'
       };
+      const keyValuePairs: IKeyValue[] = [{
+        key: "X-API-KEY",
+        value: '123'
+      }];
+
       builder.setParams(params);
+      builder.setParams(keyValuePairs)
       expect(builder.getParam('id')).to.equal('123');
       expect(builder.getParam('type')).to.equal('user');
+      expect(builder.getParam('X-API-KEY')).to.equal('123')
     });
   });
 
@@ -190,7 +207,7 @@ describe('AxiosRequestBuilder', () => {
     let axiosStub: sinon.SinonStub;
 
     beforeEach(() => {
-      axiosStub = sinon.stub(axios, 'request').resolves({ data: 'mock response' });
+      axiosStub = sinon.stub(instance, 'request').resolves({ data: 'mock response' });
     });
 
     afterEach(() => {
@@ -204,13 +221,14 @@ describe('AxiosRequestBuilder', () => {
         .addQueryParam('page', '1')
         .build()
         .execute();
-console.log(response)
       expect(response).to.equal('mock response');
       expect(axiosStub.calledOnce).to.be.true;
 
       const config: AxiosRequestConfig = axiosStub.firstCall.args[0];
-      expect(config.method).to.equal('get');
-      expect(config.url).to.equal(`${BASE_URL}/users?page=1`);
+
+      expect(config.method).to.equal(EHttpMethod.Get);
+      expect(config.url).to.equal(`${BASE_URL}/users`);
+      expect(config.params.page).to.equal('1')
     });
 
     it('should build and execute POST request with body', async () => {
@@ -223,7 +241,8 @@ console.log(response)
         .execute();
 
       const config: AxiosRequestConfig = axiosStub.firstCall.args[0];
-      expect(config.method).to.equal('post');
+
+      expect(config.method).to.equal(EHttpMethod.Post);
       expect(config.data).to.deep.equal(postData);
     });
 
@@ -250,7 +269,7 @@ console.log(response)
     let axiosStub: sinon.SinonStub;
 
     beforeEach(() => {
-      axiosStub = sinon.stub(axios, 'request');
+      axiosStub = sinon.stub(instance, 'request');
     });
 
     afterEach(() => {
