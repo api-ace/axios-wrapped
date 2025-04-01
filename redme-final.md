@@ -36,8 +36,8 @@ axios({
 
 **Axios Wrapped Example:**
 ```javascript
-const { AxiosRequestBuilder, EHttpMethod } = require('axios-wrapped');
-new AxiosRequestBuilder('https://api.example.com')
+const { Request, EHttpMethod } = require('axios-wrapped');
+new Request('https://api.example.com')
   .setMethod(EHttpMethod.Post)
   .setEndpoint('/posts')
   .addHeader('Authorization', 'Bearer token')
@@ -53,13 +53,13 @@ new AxiosRequestBuilder('https://api.example.com')
 - **Full TypeScript Support**: Type-safe methods and generics for better developer experience.
 - **Advanced Hooks**: Success and error handlers with retry capabilities.
 - **Flexible Configuration**: Easily manage headers, params, query params, and bodies.
-- **Smart Retries**: Automatic retry logic with request modification.
+- **Smart Retries**: Automatic retry logic with modification.
 - **Multiple Formats**: Supports Dates, Objects, Maps, and Arrays in headers/params.
 
 ## Installation 📦
 
 ```bash
-npm install axios-wrapped
+npm install axios axios-wrapped
 ```
 
 ## Quick Start ⚡
@@ -67,9 +67,9 @@ npm install axios-wrapped
 ### Basic GET Request
 
 ```typescript
-import { AxiosRequestBuilder, EHttpMethod } from 'axios-wrapped';
+import { Request, EHttpMethod } from 'axios-wrapped';
 
-const response = await new AxiosRequestBuilder('https://api.example.com')
+const response = await new Request('https://api.example.com')
   .setMethod(EHttpMethod.Get)
   .setEndpoint('/users')
   .addQueryParam('page', '1')
@@ -79,13 +79,13 @@ const response = await new AxiosRequestBuilder('https://api.example.com')
 console.log(response.data);
 ```
 
-## Core Concepts 🧠
+## Core Concepts
 
 ### Method Chaining
 Build requests intuitively with a chainable API:
 
 ```typescript
-const builder = new AxiosRequestBuilder('https://api.example.com')
+const builder = new Request('https://api.example.com')
   .setMethod(EHttpMethod.Post)
   .setContentType('application/json')
   .addHeader('Authorization', 'Bearer token')
@@ -111,10 +111,10 @@ builder
 ## Comprehensive Usage Guide 📖
 
 ### Creating a Request
-Start with the `AxiosRequestBuilder` class:
+Start with the `Request` class:
 
 ```typescript
-const builder = new AxiosRequestBuilder('https://api.example.com')
+const builder = new Request('https://api.example.com')
   .setMethod(EHttpMethod.Get)
   .setEndpoint('/users');
 ```
@@ -142,14 +142,6 @@ const builder = new AxiosRequestBuilder('https://api.example.com')
 | `removeHeader()`  | ✓         | Remove a specific header            | `.removeHeader('X-API-Key')`      |
 | `setHeaders()`    | ✓         | Set multiple headers at once        | `.setHeaders({ 'X-Client': 'WebApp' })` |
 
-#### Parameters Management
-| Method            | Chainable | Description                          | Example                           |
-|-------------------|-----------|--------------------------------------|-----------------------------------|
-| `getParam()`      | ✗         | Get a specific parameter value      | `builder.getParam('id')`          |
-| `hasParam()`      | ✗         | Check if a parameter exists         | `builder.hasParam('id')`          |
-| `addParam()`      | ✓         | Add a parameter                     | `.addParam('id', '123')`          |
-| `removeParam()`   | ✓         | Remove a parameter                  | `.removeParam('id')`              |
-| `setParams()`     | ✓         | Set multiple parameters at once     | `.setParams({ id: '123' })`       |
 
 #### Query Parameters Management
 | Method              | Chainable | Description                          | Example                           |
@@ -184,7 +176,7 @@ const builder = new AxiosRequestBuilder('https://api.example.com')
 
 #### Create Post
 ```typescript
-const newPost = await new AxiosRequestBuilder('https://api.example.com')
+const newPost = await new Request('https://api.example.com')
   .setMethod(EHttpMethod.Post)
   .setEndpoint('/posts')
   .setBody({
@@ -198,7 +190,7 @@ const newPost = await new AxiosRequestBuilder('https://api.example.com')
 
 #### Update with Retry Logic
 ```typescript
-const updated = await new AxiosRequestBuilder('https://api.example.com')
+const updated = await new Request('https://api.example.com')
   .setMethod(EHttpMethod.Patch)
   .setEndpoint('/posts/123')
   .setBody({ title: 'Updated Title' })
@@ -218,7 +210,7 @@ Format dates in query params or headers:
 builder.addQueryParam(
   'createdBefore',
   new Date(),
-  date => date.toISOString()
+  date => date.toISOString() // Default Formatting 
 );
 ```
 
@@ -245,7 +237,7 @@ interface User {
 }
 
 const response = await builder.build<User>().execute();
-console.log(response.data.name); // Type-safe access
+console.log(response.name); // Type-safe access
 ```
 
 ## Error Handling
@@ -253,7 +245,7 @@ console.log(response.data.name); // Type-safe access
 ### Smart Retry Strategies
 ```typescript
 builder.addOnErrorHook((error, builder) => {
-  if (error.response?.status === 429) {
+  if (error.response.status === 429) {
     builder.addHeader('RateLimit-Backoff', '1s');
     return { retry: true };
   }
@@ -266,7 +258,7 @@ builder.addOnErrorHook((error, builder) => {
 1. **Reusable Builders:**
 ```typescript
 function createAuthRequest(baseUrl: string, token: string) {
-  return new AxiosRequestBuilder(baseUrl)
+  return new Request(baseUrl)
     .addHeader('Authorization', `Bearer ${token}`)
     .setContentType('application/json');
 }
@@ -274,7 +266,7 @@ function createAuthRequest(baseUrl: string, token: string) {
 
 2. **Centralized Error Handling:**
 ```typescript
-function withDefaultRetry(builder: AxiosRequestBuilder) {
+function withDefaultRetry(builder: Request) {
   return builder.addOnErrorHook((error) => ({
     retry: error.response?.status === 503
   }));
@@ -284,7 +276,7 @@ function withDefaultRetry(builder: AxiosRequestBuilder) {
 ## API Reference 📚
 
 ### Exported Members
-- `AxiosRequestBuilder`: Main builder class.
+- `Request`: Main builder class.
 - `EHttpMethod`: Enum of HTTP methods (`Get`, `Post`, `Put`, `Delete`, `Patch`, etc.).
 
 ## License 📄
@@ -311,7 +303,7 @@ Axios Wrapped offers a builder pattern approach to constructing HTTP requests. I
 
 ```typescript
 // Using Axios Wrapped
-const response = await new AxiosRequestBuilder("https://api.example.com")
+const response = await new Request("https://api.example.com")
   .setMethod(EHttpMethod.Get)
   .setEndpoint("/users")
   .addQueryParam("page", 1)
@@ -344,7 +336,7 @@ const response = await axios({
 **With Axios Wrapped:**
 ```typescript
 // Using Axios Wrapped
-const response = await new AxiosRequestBuilder("https://api.example.com")
+const response = await new Request("https://api.example.com")
   .setMethod(EHttpMethod.Get)
   .setEndpoint("/users")
   .addQueryParam("page", 1)
@@ -375,7 +367,7 @@ const response = await axios({
 **With Axios Wrapped:**
 ```typescript
 // Using Axios Wrapped
-const response = await new AxiosRequestBuilder("https://api.example.com")
+const response = await new Request("https://api.example.com")
   .setMethod(EHttpMethod.Post)
   .setEndpoint("/users")
   .setContentType("application/json")
@@ -419,7 +411,7 @@ try {
 **With Axios Wrapped:**
 ```typescript
 // Using Axios Wrapped
-const response = await new AxiosRequestBuilder("https://api.example.com")
+const response = await new Request("https://api.example.com")
   .setMethod(EHttpMethod.Get)
   .setEndpoint("/protected")
   .addHeader("Authorization", `Bearer ${token}`)
@@ -463,7 +455,7 @@ interface User {
   name: string;
 }
 
-const user = await new AxiosRequestBuilder("https://api.example.com")
+const user = await new Request("https://api.example.com")
   .setMethod(EHttpMethod.Get)
   .setEndpoint("/users/1")
   .build<User>()
@@ -499,7 +491,7 @@ const users = await createAuthenticatedRequest('/users', 'get');
 ```typescript
 // Using Axios Wrapped
 function createAuthenticatedBuilder() {
-  return new AxiosRequestBuilder("https://api.example.com")
+  return new Request("https://api.example.com")
     .addHeader("Authorization", `Bearer ${getToken()}`)
     .setContentType("application/json");
 }
