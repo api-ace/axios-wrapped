@@ -255,13 +255,13 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
     return this;
   }
 
-  public addOnSuccessHook<TRes>(fn: (response: TRes, builder: IRequestBuilder) => Promise<IHookResult>): IRequestBuilder {
+  public addOnSuccessHook(fn: (response: any, builder?: IRequestBuilder) => Promise<IHookResult>): IRequestBuilder {
     this.successHooks.push(fn);
     return this;
   }
 
   // TODO: use better approach for retry logic :3 
-  public addOnErrorHook<TRes>(fn: (error: AxiosError<TRes> | Error, builder: IRequestBuilder, nextRetry?: boolean) => Promise<IHookResult>): IRequestBuilder {
+  public addOnErrorHook(fn: (error: AxiosError, builder: IRequestBuilder, nextRetry?: boolean) => Promise<IHookResult>): IRequestBuilder {
     this.errorHooks.push(fn);
     return this;
   }

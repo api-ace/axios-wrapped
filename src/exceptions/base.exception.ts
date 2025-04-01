@@ -1,21 +1,18 @@
 import { isArray, isObject } from "../utils";
 
-export class BaseException {
+export class BaseException extends Error {
   public readonly payload: string | Record<string, unknown>;
-  public readonly status: number;
   public readonly type: string;
-  public readonly isRpc = true;
 
-  constructor(payload: string | Record<string, any>, status: number, errorType?: string) {
+
+  constructor(payload: string | Record<string, any>, errorType?: string) {
+    super(typeof payload === "string" ? payload : payload?.message || "");
+
 
     this.payload = payload;
-    this.status = status;
-    this.type = errorType ?? this.constructor.name;
+    this.type = errorType ?? new.target.name;
   }
 
-  public getStatus(): number {
-    return this.status;
-  }
 
   public getPayload(): string | Record<string, unknown> {
     return this.payload;
@@ -25,11 +22,16 @@ export class BaseException {
     return this.type;
   }
 
-  public static createPayload(objectOrError: object | string, description?: string, statusCode?: number): object {
+  public static createPayload(
+    objectOrError: object | string,
+    description?: string,
+  ): object {
     if (!objectOrError) {
-      return { statusCode, message: description };
+      return { message: description };
     }
 
-    return isObject(objectOrError) && !isArray(objectOrError) ? (objectOrError as object) : { statusCode, message: objectOrError, error: description };
+    return isObject(objectOrError) && !isArray(objectOrError)
+      ? (objectOrError as object)
+      : { message: objectOrError, error: description };
   }
 }

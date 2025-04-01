@@ -38,7 +38,7 @@ export class RequestBuilder extends BaseRequestBuilder {
         for (const fn of this.successHooks) {
           const sRes = await fn(response, this);
           if (!isNil(sRes)) {
-            retry = retry || !!sRes.retry;
+            retry = retry || !!sRes?.retry;
           }
         }
         data = response.data;

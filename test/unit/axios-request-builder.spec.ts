@@ -1,9 +1,14 @@
 import { expect } from 'chai';
 import { describe, it, beforeEach, afterEach } from 'mocha';
-import { Request, EHttpMethod , IKeyValue } from '../../src/index.js';
+import { Request, EHttpMethod, IKeyValue } from '../../src/index.js';
 import axios, { AxiosRequestConfig } from 'axios';
 import sinon from 'sinon';
+import { TypeMismatchException } from '../../src/exceptions/type-mismatch.exception.js';
 
+
+function expectTypeMismatch(fn: () => void, message?: string) {
+  expect(fn).to.throw(TypeMismatchException, message);
+}
 
 describe('AxiosRequestBuilder', () => {
   const BASE_URL = 'https://api.example.com';
@@ -304,5 +309,35 @@ describe('AxiosRequestBuilder', () => {
       expect(response).to.equal('success');
       expect(axiosStub.calledTwice).to.be.true;
     });
+
   });
+
+  describe("Input validations",()=>{
+    describe('setHeaders', () => {
+      it('should throw on invalid headers type', () => {
+        expectTypeMismatch(() => builder.setHeaders(123 as unknown as IKeyValue[]));
+        expectTypeMismatch(() => builder.setHeaders(true as unknown as IKeyValue[]));
+        expectTypeMismatch(() => builder.setHeaders(null as unknown as IKeyValue[]));
+        expectTypeMismatch(() => builder.setHeaders(undefined as unknown as IKeyValue[]));
+        expectTypeMismatch(() => builder.setHeaders('string' as unknown as IKeyValue[]));
+      });
+  
+      it('should throw on invalid array elements in IKeyValue[]', () => {
+        const invalidArray = [
+          { key: 'validKey', value: 'validValue' },
+          { invalidProperty: 'value' }
+        ] as unknown as IKeyValue[];
+        
+        expectTypeMismatch(() => builder.setHeaders(invalidArray));
+      });
+  
+      it('should throw on invalid Map entries', () => {
+        const invalidMap = new Map();
+        invalidMap.set(123, 'value'); // hmm this one failed
+        // add es / ts linting - currently global one is used ? or not maybe
+        
+        expectTypeMismatch(() => builder.setHeaders(invalidMap as unknown as Map<string, string>));
+      });
+    });
+  })
 });

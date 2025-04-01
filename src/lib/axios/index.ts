@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosError } from "axios";
+import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosError, AxiosResponse } from "axios";
 
-export type { AxiosInstance, InternalAxiosRequestConfig };
+export type { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse };
 export { axios, AxiosError }

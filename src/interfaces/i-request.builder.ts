@@ -1,5 +1,5 @@
 import { EHttpMethod } from "../enums";
-import { AxiosError, AxiosInstance } from "../lib";
+import { AxiosError, AxiosInstance, AxiosResponse } from "../lib";
 import { IExecutable } from "./i-executable";
 import { IHookResult } from "./i-hook-result";
 import { IKeyValue } from "./i-key-value";
@@ -313,8 +313,7 @@ export interface IRequestBuilder {
    * @param {(response: any, builder: IRequestBuilder) => Promise<any>} fn - A callback function to handle successful responses.
    * @returns {IRequestBuilder} The current instance of the request builder for chaining.
    */
-  addOnSuccessHook<TRes>(fn: (response: TRes, builder: IRequestBuilder) => Promise<IHookResult>): IRequestBuilder;
-  addOnSuccessHook(fn: (response: any, builder: IRequestBuilder) => Promise<IHookResult>): IRequestBuilder;
+  addOnSuccessHook(fn: (response: AxiosResponse, builder: IRequestBuilder) => IHookResult | Promise<IHookResult> ): IRequestBuilder;
 
   /**
    * Adds an error hook to be executed after an error occurs during a request.
@@ -322,8 +321,8 @@ export interface IRequestBuilder {
    * @param {(error: any, builder: IRequestBuilder, nextRetry?: boolean) => Promise<any>} fn - A callback function to handle errors during requests.
    * @returns {IRequestBuilder} The current instance of the request builder for chaining.
    */
-  addOnErrorHook<TRes>(fn: (error: AxiosError<TRes> | Error, builder: IRequestBuilder, nextRetry?: boolean) => Promise<IHookResult>): IRequestBuilder;
-  addOnErrorHook(fn: (error: any, builder: IRequestBuilder, nextRetry?: boolean) => Promise<IHookResult>): IRequestBuilder;
+
+  addOnErrorHook(fn: (error: AxiosError , builder: IRequestBuilder, nextRetry?: boolean) =>  Promise<IHookResult>): IRequestBuilder;
 
   /**
    * method that builds and returns an executable object for making HTTP requests.
