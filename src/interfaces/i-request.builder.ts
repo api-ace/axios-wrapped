@@ -97,10 +97,10 @@ export interface IRequestBuilder {
    *
    * @param {string} name - Header key.
    * @param {Date} value - Header value (Date).
-   * @param {(date: Date) => string} [formater] - Formatter function for date values. Optional if not a date value.
+   * @param {(date: Date) => string} [formatter] - Formatter function for date values. Optional if not a date value.
    * @returns {IRequestBuilder} The current instance of the builder for chaining.
  */
-  addHeader(name: string, value: Date, formater?: (date: Date) => string): IRequestBuilder;
+  addHeader(name: string, value: Date, formatter?: (date: Date) => string): IRequestBuilder;
 
   /**
    * Adds a new header or updates an existing one in the request headers.
@@ -166,10 +166,10 @@ export interface IRequestBuilder {
   * Adds a date param to the params map.
   * @param {string} name - The name of the param
   * @param {Date} value - The value of the param
-  * @param {(date: Date) => string} [formater] - Formatter function for date values. Optional if not a date value.
+  * @param {(date: Date) => string} [formatter] - Formatter function for date values. Optional if not a date value.
   * @returns {IRequestBuilder}
   */
-  addParam(name: string, date: Date, formater?: (date: Date) => string): IRequestBuilder;
+  addParam(name: string, date: Date, formatter?: (date: Date) => string): IRequestBuilder;
 
   /**
    * Adds a param to the params map.
@@ -241,10 +241,10 @@ export interface IRequestBuilder {
    * Adds query param
    * @param {string} name - the name of the query param
    * @param {Date | Date[]} value - the value of the query param
-   * @param {(date: Date) => string} [formater] - Formatter function for date values. Optional if not a date value.
+   * @param {(date: Date) => string} [formatter] - Formatter function for date values. Optional if not a date value.
    * @returns {IRequestBuilder}
    */
-  addQueryParam(name: string, value: Date | Date[], formater?: (date: Date) => string): IRequestBuilder;
+  addQueryParam(name: string, value: Date | Date[], formatter?: (date: Date) => string): IRequestBuilder;
 
   /**
    * Adds query param

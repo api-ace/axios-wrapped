@@ -1,10 +1,10 @@
+import { CONTENT_TYPE, EMPTY_STR } from "../../constants";
 import { EHttpMethod } from "../../enums";
 import { TypeMismatchException } from "../../exceptions";
 import { IExecutable, IHookResult, IKeyValue, IRequestBuilder } from "../../interfaces";
-import { EMPTY_STR, filter, first, isArray, isEmpty, isNil, isNilOrEmpty, isObject, map } from "../../utils";
+import { filter, first, isArray, isEmpty, isNil, isNilOrEmpty, isObject, map } from "../../utils";
 import { AxiosError, AxiosInstance } from "../axios";
 
-const CONTENT_TYPE = "content-type";
 
 export abstract class BaseRequestBuilder implements IRequestBuilder {
   protected url: string;
@@ -67,9 +67,9 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
   }
 
   public addHeader(name: string, value: string | number | boolean): IRequestBuilder;
-  public addHeader(name: string, value: Date, formater?: (date: Date) => string): IRequestBuilder;
+  public addHeader(name: string, value: Date, formatter?: (date: Date) => string): IRequestBuilder;
   public addHeader(header: IKeyValue): IRequestBuilder;
-  public addHeader(name: unknown, value?: unknown, formater?: (date: Date) => string): IRequestBuilder {
+  public addHeader(name: unknown, value?: unknown, formatter?: (date: Date) => string): IRequestBuilder {
     if (isObject(name)) {
       const { key, value } = name as IKeyValue;
       this.headers.set(key.toLowerCase(), value);
@@ -78,7 +78,7 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
     if (typeof name !== "string") {
       throw new TypeMismatchException("'name' should be type of string");
     }
-    this.headers.set(name.toLowerCase(), this.normalizeValue(value, formater) as string);
+    this.headers.set(name.toLowerCase(), this.normalizeValue(value, formatter) as string);
     return this;
   }
 
@@ -128,9 +128,9 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
 
   // really ? do devs actually need it ???
   public addParam(name: string, value: string | number | boolean): IRequestBuilder;
-  public addParam(name: string, date: Date, formater?: (date: Date) => string): IRequestBuilder;
+  public addParam(name: string, date: Date, formatter?: (date: Date) => string): IRequestBuilder;
   public addParam(param: IKeyValue): IRequestBuilder;
-  public addParam(name: unknown, value?: unknown, formater?: (date: Date) => string): IRequestBuilder {
+  public addParam(name: unknown, value?: unknown, formatter?: (date: Date) => string): IRequestBuilder {
     if (isObject(name)) {
       const { key, value } = name as IKeyValue;
       this.params.set(key, value);
@@ -139,7 +139,7 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
     if (typeof name !== "string") {
       throw new TypeMismatchException("'name' should be type of string");
     }
-    this.params.set(name, this.normalizeValue(value, formater) as string);
+    this.params.set(name, this.normalizeValue(value, formatter) as string);
     return this;
   }
 
@@ -188,9 +188,9 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
   }
 
   public addQueryParam(name: string, value: string | number | boolean | string[] | number[] | boolean[]): IRequestBuilder;
-  public addQueryParam(name: string, value: Date | Date[], formater?: (date: Date) => string): IRequestBuilder;
+  public addQueryParam(name: string, value: Date | Date[], formatter?: (date: Date) => string): IRequestBuilder;
   public addQueryParam(qp: IKeyValue<string, string | string[]>);
-  public addQueryParam(name: unknown, value?: unknown, formater?: (date: Date) => string): IRequestBuilder {
+  public addQueryParam(name: unknown, value?: unknown, formatter?: (date: Date) => string): IRequestBuilder {
     if (isObject(name) && !isArray(name)) {
       const { key, value } = name as IKeyValue;
       const record = this.query.get(key);
@@ -202,7 +202,7 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
     }
 
     const record = this.query.get(name);
-    this.query.set(name, this.updatedValue(record, value, formater));
+    this.query.set(name, this.updatedValue(record, value, formatter));
     return this;
   }
 
@@ -281,10 +281,10 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
     this.errorHooks = [];
   }
 
-  private normalizeValue(value: unknown, formater?: (date: Date) => string): string | string[] {
+  private normalizeValue(value: unknown, formatter?: (date: Date) => string): string | string[] {
     if (value instanceof Date || (isArray(value) && first(value) instanceof Date)) {
-      formater = formater ?? ((date: Date): string => date.toISOString());
-      return isArray(value) ? map(value as Date[], formater) : formater(value);
+      formatter = formatter ?? ((date: Date): string => date.toISOString());
+      return isArray(value) ? map(value as Date[], formatter) : formatter(value);
     }
     if (isArray(value)) {
       const arr = filter(
@@ -299,8 +299,8 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
     return null;
   }
 
-  private updatedValue(oldValue: string | string[], newValue: unknown, formater?: (date: Date) => string): string | string[] {
-    const value: string | string[] = this.normalizeValue(newValue, formater);
+  private updatedValue(oldValue: string | string[], newValue: unknown, formatter?: (date: Date) => string): string | string[] {
+    const value: string | string[] = this.normalizeValue(newValue, formatter);
     if (isArray(oldValue)) {
       return isArray(value) ? [...oldValue, ...value] : [...oldValue, value];
     } else if (!isNil(oldValue)) {

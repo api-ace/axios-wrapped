@@ -1,8 +1,8 @@
+import { PARAM_PREFIX } from "./constants";
 import { IExecutable } from "./interfaces";
 import { axios, AxiosInstance, BaseRequestBuilder } from "./lib";
 import { isNil, isNilOrEmpty, mapToObject } from "./utils";
 
-const PARAM_PREFIX = ":";
 
 export class AxiosRequestBuilder extends BaseRequestBuilder {
   private instance: AxiosInstance;
