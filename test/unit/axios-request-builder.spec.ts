@@ -1,17 +1,17 @@
 import { expect } from 'chai';
 import { describe, it, beforeEach, afterEach } from 'mocha';
-import { AxiosRequestBuilder, EHttpMethod } from '../../src/index.js';
+import { Request, EHttpMethod , IKeyValue } from '../../src/index.js';
 import axios, { AxiosRequestConfig } from 'axios';
 import sinon from 'sinon';
-import { IKeyValue } from '../../src/interfaces/i-key-value.js';
+
 
 describe('AxiosRequestBuilder', () => {
   const BASE_URL = 'https://api.example.com';
-  let builder: AxiosRequestBuilder;
+  let builder: Request;
   const instance = axios.create()
 
   beforeEach(() => {
-    builder = new AxiosRequestBuilder(BASE_URL, instance);
+    builder = new Request(BASE_URL, instance);
   });
 
   describe('Initialization', () => {

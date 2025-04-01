@@ -41,9 +41,9 @@ const jsConfig = {
     typescript({
       outputToFilesystem:true,
       tsconfig: "./tsconfig.json",
-      declaration: false, // Enable declaration generation
+      declaration: false, 
       outDir: "dist",
-      sourceMap: true, // Enable source maps to match output config
+      sourceMap: true, 
     }),
     terser(),
   ],

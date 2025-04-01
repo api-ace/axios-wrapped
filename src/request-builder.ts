@@ -4,7 +4,7 @@ import { axios, AxiosInstance, BaseRequestBuilder } from "./lib";
 import { isNil, isNilOrEmpty, mapToObject } from "./utils";
 
 
-export class AxiosRequestBuilder extends BaseRequestBuilder {
+export class RequestBuilder extends BaseRequestBuilder {
   private instance: AxiosInstance;
 
   constructor(url?: string, instance?: AxiosInstance) {
@@ -88,11 +88,6 @@ export class AxiosRequestBuilder extends BaseRequestBuilder {
     return data as TRes;
   }
 
-  /**
- * Retrieves the Axios instance used for making HTTP requests.
- * 
- * @returns {AxiosInstance} The Axios instance.
- */
   public getInstance(): AxiosInstance {
     return this.instance;
   }
