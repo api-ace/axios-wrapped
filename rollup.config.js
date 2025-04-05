@@ -2,7 +2,7 @@ import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import typescript from '@rollup/plugin-typescript';
-import  terser  from '@rollup/plugin-terser';
+import terser from '@rollup/plugin-terser';
 import { dts } from "rollup-plugin-dts";
 import nodePolyfills from 'rollup-plugin-polyfill-node';
 import autoExternal from "rollup-plugin-auto-external";
@@ -39,15 +39,15 @@ const jsConfig = {
     json(),
     nodePolyfills(),
     typescript({
-      outputToFilesystem:true,
+      outputToFilesystem: true,
       tsconfig: "./tsconfig.json",
-      declaration: false, 
+      declaration: false,
       outDir: "dist",
-      sourceMap: true, 
+      sourceMap: true,
     }),
     terser({
-      mangle:{
-        reserved:['TypeMismatchException']
+      mangle: {
+        reserved: ['TypeMismatchException']
       }
     }),
   ],
@@ -58,7 +58,7 @@ const dtsConfig = {
   input: 'src/index.ts',
   output: {
     file: 'dist/index.d.ts',
-    format: 'es', 
+    format: 'es',
   },
   plugins: [dts({
     tsconfig: "./tsconfig.json"

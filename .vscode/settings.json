@@ -1,0 +1,23 @@
+{
+    "eslint.enable": true,
+    "eslint.format.enable": true,
+    "eslint.useFlatConfig": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "never"
+    },
+    "eslint.validate": [
+        "javascript",
+        "typescript"
+    ],
+    "files.associations": {
+        "eslint.config.ts": "typescript"
+    },
+    "eslint.workingDirectories": [
+        "./"
+    ],
+    "[typescript]": {
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+        "editor.formatOnSave": true
+    },
+    "prettier.prettierPath": "./node_modules/prettier"
+}
