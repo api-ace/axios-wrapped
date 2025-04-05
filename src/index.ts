@@ -1,4 +1,4 @@
-export { RequestBuilder as Request } from './request-builder';
+export { Request } from './request';
 
 export { EHttpMethod } from './enums';
 

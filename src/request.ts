@@ -3,7 +3,7 @@ import { IExecutable } from './interfaces';
 import { axios, AxiosInstance, AxiosResponse, BaseRequestBuilder } from './lib';
 import { isNil, isNilOrEmpty, mapToObject } from './utils';
 
-export class RequestBuilder extends BaseRequestBuilder {
+export class Request extends BaseRequestBuilder {
   private instance: AxiosInstance;
 
   constructor(url?: string, instance?: AxiosInstance) {
