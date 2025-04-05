@@ -1,5 +1,5 @@
-export { RequestBuilder as Request } from "./request-builder"
+export { RequestBuilder as Request } from './request-builder';
 
-export { EHttpMethod } from "./enums"
+export { EHttpMethod } from './enums';
 
-export { IKeyValue } from "./interfaces"
+export { IKeyValue } from './interfaces';

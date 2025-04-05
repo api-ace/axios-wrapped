@@ -1,1 +1,1 @@
-export * from "./e-http-method"
+export * from './e-http-method';

@@ -1,8 +1,7 @@
-import { PARAM_PREFIX } from "./constants";
-import { IExecutable } from "./interfaces";
-import { axios, AxiosInstance, BaseRequestBuilder } from "./lib";
-import { isNil, isNilOrEmpty, mapToObject } from "./utils";
-
+import { PARAM_PREFIX } from './constants';
+import { IExecutable } from './interfaces';
+import { axios, AxiosInstance, AxiosResponse, BaseRequestBuilder } from './lib';
+import { isNil, isNilOrEmpty, mapToObject } from './utils';
 
 export class RequestBuilder extends BaseRequestBuilder {
   private instance: AxiosInstance;
@@ -12,28 +11,12 @@ export class RequestBuilder extends BaseRequestBuilder {
     this.init(instance);
   }
 
-  public build<TRes = any>(): IExecutable<TRes> {
-    let url = this.url;
-    if (!isNilOrEmpty(this.endpoint)) {
-      url += this.endpoint;
-    }
-    for (const [key, value] of this.params) {
-      url = url.replace(PARAM_PREFIX + key, value);
-    }
-    const headers = mapToObject(this.headers);
-    const queryParams = mapToObject(this.query);
-
+  public build<TRes = unknown>(): IExecutable<TRes> {
     const execute = async (): Promise<TRes> => {
       let data = null;
       let retry = false;
       try {
-        const response = await this.instance.request({
-          url,
-          method: this.method.toString(),
-          headers: headers,
-          params: queryParams,
-          data: this.body ?? undefined,
-        });
+        const response = await this.createRequestObject();
 
         for (const fn of this.successHooks) {
           const sRes = await fn(response, this);
@@ -58,7 +41,7 @@ export class RequestBuilder extends BaseRequestBuilder {
     return { execute };
   }
 
-  private async buildAndExecWithoutRetry<TRes = any>(): Promise<TRes> {
+  private async buildAndExecWithoutRetry<TRes = unknown>(): Promise<TRes> {
     let url = this.url;
     if (!isNilOrEmpty(this.endpoint)) {
       url += this.endpoint;
@@ -69,13 +52,8 @@ export class RequestBuilder extends BaseRequestBuilder {
 
     let data = null;
     try {
-      const response = await this.instance.request({
-        url,
-        method: this.method.toString(),
-        headers: mapToObject(this.headers),
-        params: mapToObject(this.query),
-        data: this.body,
-      });
+      const response = await this.createRequestObject();
+
       for (const fn of this.successHooks) {
         await fn(response, this);
       }
@@ -95,4 +73,30 @@ export class RequestBuilder extends BaseRequestBuilder {
   private init(instance?: AxiosInstance): void {
     this.instance = instance ?? axios.create();
   }
+
+  private buildUrl = (): string => {
+    let url = this.url;
+    if (!isNilOrEmpty(this.endpoint)) {
+      url += this.endpoint;
+    }
+    for (const [key, value] of this.params) {
+      url = url.replace(PARAM_PREFIX + key, value);
+    }
+    return url;
+  };
+
+  private readonly buildHeaders = (): Record<string, string> => mapToObject(this.headers);
+
+  private readonly buildQueryParams = (): Record<string, string | string[]> =>
+    mapToObject(this.query);
+
+  private readonly createRequestObject = (): Promise<AxiosResponse> => {
+    return this.instance.request({
+      url: this.buildUrl(),
+      method: this.method.toString(),
+      headers: this.buildHeaders(),
+      params: this.buildQueryParams(),
+      data: this.body ?? undefined,
+    });
+  };
 }

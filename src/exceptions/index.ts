@@ -1,1 +1,1 @@
-export * from "./type-mismatch.exception"
+export * from './type-mismatch.exception';

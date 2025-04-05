@@ -1,3 +1,3 @@
 export interface IExecutable<TRes> {
-  execute(data?: any): Promise<TRes>;
+  execute(data?: unknown): Promise<TRes>;
 }

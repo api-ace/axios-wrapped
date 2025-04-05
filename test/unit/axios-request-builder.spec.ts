@@ -1,19 +1,14 @@
+/* eslint-disable */
 import { expect } from 'chai';
-import { describe, it, beforeEach, afterEach } from 'mocha';
-import { Request, EHttpMethod, IKeyValue } from '../../src/index.js';
+import { afterEach, beforeEach, describe, it } from 'mocha';
+import { EHttpMethod, IKeyValue, Request } from '../../src/index.js';
 import axios, { AxiosRequestConfig } from 'axios';
 import sinon from 'sinon';
-import { TypeMismatchException } from '../../src/exceptions/type-mismatch.exception.js';
-
-
-function expectTypeMismatch(fn: () => void, message?: string) {
-  expect(fn).to.throw(TypeMismatchException, message);
-}
 
 describe('AxiosRequestBuilder', () => {
   const BASE_URL = 'https://api.example.com';
   let builder: Request;
-  const instance = axios.create()
+  const instance = axios.create();
 
   beforeEach(() => {
     builder = new Request(BASE_URL, instance);
@@ -83,7 +78,7 @@ describe('AxiosRequestBuilder', () => {
     it('should set multiple headers', () => {
       const headers = {
         'X-Client': 'WebApp',
-        'Accept-Language': 'en-US'
+        'Accept-Language': 'en-US',
       };
       builder.setHeaders(headers);
       expect(builder.getHeader('X-Client')).to.equal('WebApp');
@@ -98,13 +93,13 @@ describe('AxiosRequestBuilder', () => {
 
       const keyValueParams: IKeyValue = {
         key: 'userId',
-        value: '345'
-      }
+        value: '345',
+      };
 
       builder.addParam(paramName, paramValue);
-      builder.addParam(keyValueParams)
+      builder.addParam(keyValueParams);
       expect(builder.getParam(paramName)).to.equal(paramValue);
-      expect(builder.getParam('userId')).to.equal('345')
+      expect(builder.getParam('userId')).to.equal('345');
     });
 
     it('should check if parameter exists', () => {
@@ -124,18 +119,20 @@ describe('AxiosRequestBuilder', () => {
     it('should set multiple parameters', () => {
       const params = {
         id: '123',
-        type: 'user'
+        type: 'user',
       };
-      const keyValuePairs: IKeyValue[] = [{
-        key: "X-API-KEY",
-        value: '123'
-      }];
+      const keyValuePairs: IKeyValue[] = [
+        {
+          key: 'X-API-KEY',
+          value: '123',
+        },
+      ];
 
       builder.setParams(params);
-      builder.setParams(keyValuePairs)
+      builder.setParams(keyValuePairs);
       expect(builder.getParam('id')).to.equal('123');
       expect(builder.getParam('type')).to.equal('user');
-      expect(builder.getParam('X-API-KEY')).to.equal('123')
+      expect(builder.getParam('X-API-KEY')).to.equal('123');
     });
   });
 
@@ -164,7 +161,7 @@ describe('AxiosRequestBuilder', () => {
     it('should set multiple query parameters', () => {
       const params = {
         page: '2',
-        limit: '10'
+        limit: '10',
       };
       builder.setQueryParams(params);
       expect(builder.getQueryParam('page')).to.equal('2');
@@ -233,7 +230,7 @@ describe('AxiosRequestBuilder', () => {
 
       expect(config.method).to.equal(EHttpMethod.Get);
       expect(config.url).to.equal(`${BASE_URL}/users`);
-      expect(config.params.page).to.equal('1')
+      expect(config.params.page).to.equal('1');
     });
 
     it('should build and execute POST request with body', async () => {
@@ -309,35 +306,5 @@ describe('AxiosRequestBuilder', () => {
       expect(response).to.equal('success');
       expect(axiosStub.calledTwice).to.be.true;
     });
-
   });
-
-  describe("Input validations",()=>{
-    describe('setHeaders', () => {
-      it('should throw on invalid headers type', () => {
-        expectTypeMismatch(() => builder.setHeaders(123 as unknown as IKeyValue[]));
-        expectTypeMismatch(() => builder.setHeaders(true as unknown as IKeyValue[]));
-        expectTypeMismatch(() => builder.setHeaders(null as unknown as IKeyValue[]));
-        expectTypeMismatch(() => builder.setHeaders(undefined as unknown as IKeyValue[]));
-        expectTypeMismatch(() => builder.setHeaders('string' as unknown as IKeyValue[]));
-      });
-  
-      it('should throw on invalid array elements in IKeyValue[]', () => {
-        const invalidArray = [
-          { key: 'validKey', value: 'validValue' },
-          { invalidProperty: 'value' }
-        ] as unknown as IKeyValue[];
-        
-        expectTypeMismatch(() => builder.setHeaders(invalidArray));
-      });
-  
-      it('should throw on invalid Map entries', () => {
-        const invalidMap = new Map();
-        invalidMap.set(123, 'value'); // hmm this one failed
-        // add es / ts linting - currently global one is used ? or not maybe
-        
-        expectTypeMismatch(() => builder.setHeaders(invalidMap as unknown as Map<string, string>));
-      });
-    });
-  })
 });

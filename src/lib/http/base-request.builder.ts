@@ -1,10 +1,9 @@
-import { CONTENT_TYPE, EMPTY_STR } from "../../constants";
-import { EHttpMethod } from "../../enums";
-import { TypeMismatchException } from "../../exceptions";
-import { IExecutable, IHookResult, IKeyValue, IRequestBuilder } from "../../interfaces";
-import { filter, first, isArray, isEmpty, isNil, isNilOrEmpty, isObject, map } from "../../utils";
-import { AxiosError, AxiosInstance } from "../axios";
-
+import { CONTENT_TYPE, EMPTY_STR } from '../../constants';
+import { EHttpMethod } from '../../enums';
+import { TypeMismatchException } from '../../exceptions';
+import { IExecutable, IHookResult, IKeyValue, IRequestBuilder } from '../../interfaces';
+import { filter, first, isArray, isEmpty, isNil, isNilOrEmpty, isObject, map } from '../../utils';
+import { AxiosError, AxiosInstance, AxiosResponse } from '../axios';
 
 export abstract class BaseRequestBuilder implements IRequestBuilder {
   protected url: string;
@@ -13,9 +12,13 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
   protected headers: Map<string, string>;
   protected params: Map<string, string>;
   protected query: Map<string, string | string[]>;
-  protected body: any;
-  protected successHooks: Array<(response: any, builder: IRequestBuilder) => Promise<IHookResult>>;
-  protected errorHooks: Array<(error: any, builder: IRequestBuilder, nextRetry?: boolean) => Promise<IHookResult>>;
+  protected body: unknown;
+  protected successHooks: Array<
+    (response: AxiosResponse, builder: IRequestBuilder) => Promise<IHookResult>
+  >;
+  protected errorHooks: Array<
+    (error: AxiosError, builder: IRequestBuilder, nextRetry?: boolean) => Promise<IHookResult>
+  >;
 
   constructor(url?: string) {
     this.initialize();
@@ -69,13 +72,17 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
   public addHeader(name: string, value: string | number | boolean): IRequestBuilder;
   public addHeader(name: string, value: Date, formatter?: (date: Date) => string): IRequestBuilder;
   public addHeader(header: IKeyValue): IRequestBuilder;
-  public addHeader(name: unknown, value?: unknown, formatter?: (date: Date) => string): IRequestBuilder {
+  public addHeader(
+    name: unknown,
+    value?: unknown,
+    formatter?: (date: Date) => string,
+  ): IRequestBuilder {
     if (isObject(name)) {
-      const { key, value } = name as IKeyValue;
+      const { key, value } = name as unknown as IKeyValue;
       this.headers.set(key.toLowerCase(), value);
       return this;
     }
-    if (typeof name !== "string") {
+    if (typeof name !== 'string') {
       throw new TypeMismatchException("'name' should be type of string");
     }
     this.headers.set(name.toLowerCase(), this.normalizeValue(value, formatter) as string);
@@ -86,7 +93,7 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
   public removeHeader(header: IKeyValue): IRequestBuilder;
   public removeHeader(header: unknown): IRequestBuilder {
     if (isObject(header)) {
-      this.headers.delete((header as IKeyValue).key.toLowerCase());
+      this.headers.delete((header as unknown as IKeyValue).key.toLowerCase());
     }
     this.headers.delete((header as string).toLowerCase());
     return this;
@@ -115,7 +122,9 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
       }
       return this;
     }
-    throw new TypeMismatchException("'headers' should be Array of key-value pairs, Map, object as dictionary");
+    throw new TypeMismatchException(
+      "'headers' should be Array of key-value pairs, Map, object as dictionary",
+    );
   }
 
   public getParam(name: string): string {
@@ -130,13 +139,17 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
   public addParam(name: string, value: string | number | boolean): IRequestBuilder;
   public addParam(name: string, date: Date, formatter?: (date: Date) => string): IRequestBuilder;
   public addParam(param: IKeyValue): IRequestBuilder;
-  public addParam(name: unknown, value?: unknown, formatter?: (date: Date) => string): IRequestBuilder {
+  public addParam(
+    name: unknown,
+    value?: unknown,
+    formatter?: (date: Date) => string,
+  ): IRequestBuilder {
     if (isObject(name)) {
-      const { key, value } = name as IKeyValue;
+      const { key, value } = name as unknown as IKeyValue;
       this.params.set(key, value);
       return this;
     }
-    if (typeof name !== "string") {
+    if (typeof name !== 'string') {
       throw new TypeMismatchException("'name' should be type of string");
     }
     this.params.set(name, this.normalizeValue(value, formatter) as string);
@@ -147,7 +160,7 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
   public removeParam(param: IKeyValue): IRequestBuilder;
   public removeParam(param: unknown): IRequestBuilder {
     if (isObject(param)) {
-      this.params.delete((param as IKeyValue).key);
+      this.params.delete((param as unknown as IKeyValue).key);
     }
     this.params.delete(param as string);
     return this;
@@ -176,7 +189,9 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
       }
       return this;
     }
-    throw new TypeMismatchException("'params' should be Array of key-value pairs, Map, object as dictionary");
+    throw new TypeMismatchException(
+      "'params' should be Array of key-value pairs, Map, object as dictionary",
+    );
   }
 
   public getQueryParam(name: string): string | string[] {
@@ -187,17 +202,28 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
     return !isNilOrEmpty(this.query.get(name));
   }
 
-  public addQueryParam(name: string, value: string | number | boolean | string[] | number[] | boolean[]): IRequestBuilder;
-  public addQueryParam(name: string, value: Date | Date[], formatter?: (date: Date) => string): IRequestBuilder;
+  public addQueryParam(
+    name: string,
+    value: string | number | boolean | string[] | number[] | boolean[],
+  ): IRequestBuilder;
+  public addQueryParam(
+    name: string,
+    value: Date | Date[],
+    formatter?: (date: Date) => string,
+  ): IRequestBuilder;
   public addQueryParam(qp: IKeyValue<string, string | string[]>);
-  public addQueryParam(name: unknown, value?: unknown, formatter?: (date: Date) => string): IRequestBuilder {
+  public addQueryParam(
+    name: unknown,
+    value?: unknown,
+    formatter?: (date: Date) => string,
+  ): IRequestBuilder {
     if (isObject(name) && !isArray(name)) {
-      const { key, value } = name as IKeyValue;
+      const { key, value } = name as unknown as IKeyValue;
       const record = this.query.get(key);
       this.query.set(key, this.updatedValue(record, value));
       return this;
     }
-    if (typeof name !== "string") {
+    if (typeof name !== 'string') {
       throw new TypeMismatchException("'name' should be type of string");
     }
 
@@ -210,7 +236,7 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
   public removeQueryParam(qp: IKeyValue<string, string | string[]>): IRequestBuilder;
   public removeQueryParam(name: unknown): IRequestBuilder {
     if (isObject(name)) {
-      this.query.delete((name as IKeyValue).key);
+      this.query.delete((name as unknown as IKeyValue).key);
     }
     this.query.delete(name as string);
     return this;
@@ -234,12 +260,14 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
     }
     if (isObject(params)) {
       for (const key in params as Record<string, string>) {
-        const value = params[key];
+        const value = params[key] as string;
         this.query.set(key, value);
       }
       return this;
     }
-    throw new TypeMismatchException("'params' should be Array of key-value pairs, Map, object as dictionary");
+    throw new TypeMismatchException(
+      "'params' should be Array of key-value pairs, Map, object as dictionary",
+    );
   }
 
   public getBody<TBody>(): TBody {
@@ -255,18 +283,22 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
     return this;
   }
 
-  public addOnSuccessHook(fn: (response: any, builder?: IRequestBuilder) => Promise<IHookResult>): IRequestBuilder {
+  public addOnSuccessHook(
+    fn: (response: AxiosResponse, builder?: IRequestBuilder) => Promise<IHookResult>,
+  ): IRequestBuilder {
     this.successHooks.push(fn);
     return this;
   }
 
-  // TODO: use better approach for retry logic :3 
-  public addOnErrorHook(fn: (error: AxiosError, builder: IRequestBuilder, nextRetry?: boolean) => Promise<IHookResult>): IRequestBuilder {
+  // TODO: use better approach for retry logic :3
+  public addOnErrorHook(
+    fn: (error: AxiosError, builder: IRequestBuilder, nextRetry?: boolean) => Promise<IHookResult>,
+  ): IRequestBuilder {
     this.errorHooks.push(fn);
     return this;
   }
 
-  public abstract build<TRes = any>(): IExecutable<TRes>;
+  public abstract build<TRes = unknown>(): IExecutable<TRes>;
   public abstract getInstance(): AxiosInstance;
 
   protected initialize(): void {
@@ -299,7 +331,11 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
     return null;
   }
 
-  private updatedValue(oldValue: string | string[], newValue: unknown, formatter?: (date: Date) => string): string | string[] {
+  private updatedValue(
+    oldValue: string | string[],
+    newValue: unknown,
+    formatter?: (date: Date) => string,
+  ): string | string[] {
     const value: string | string[] = this.normalizeValue(newValue, formatter);
     if (isArray(oldValue)) {
       return isArray(value) ? [...oldValue, ...value] : [...oldValue, value];
