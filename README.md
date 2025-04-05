@@ -1,167 +1,286 @@
-# Axios Wrapped
+
+# 🚀 Axios Wrapped
 
 [![npm version](https://img.shields.io/npm/v/axios-wrapped.svg?style=flat-square)](https://www.npmjs.com/package/axios-wrapped)
+[![Package Size](https://img.shields.io/bundlephobia/min/axios-wrapped)](https://bundlephobia.com/package/axios-wrapped)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg?style=flat-square)](https://www.typescriptlang.org/)
 
-A fluent, chainable HTTP client builder for Node.js and browsers, powered by Axios. Perfect for crafting API requests with elegance and precision.
+> Making HTTP requests that don't make you want to pull your hair out!
 
-## Features ✨
+A fluent, chainable HTTP client builder for Node.js and browsers, built on top of Axios. Because life's too short for messy request configs.
 
-- **Fluent Interface** - Chain methods for clean, readable request configuration
-- **TypeScript First** - Full type safety with generics support
-- **Advanced Hooks** - Custom success/error handlers with retry capabilities
-- **Flexible Configuration** - Set headers, params, query params, and bodies with ease
-- **Smart Retries** - Automatic retry logic with request modification
-- **Multiple Formats** - Support for Dates, Objects, Maps and Arrays in headers/params
+## Why Axios Wrapped?
 
-## Installation 📦
+Ever looked at your API code and thought it resembled spaghetti more than JavaScript? Us too! That's why we created `axios-wrapped` - to bring some sanity back to your HTTP requests.
 
-```bash
-npm install axios-wrapped
+```javascript
+// Before: "What was I even trying to do here?"
+axios({
+  method: 'post',
+  url: 'https://api.example.com/posts',
+  headers: { 'Authorization': 'Bearer ' + token, 'X-API-Version': '2.0' },
+  params: { source: 'web' },
+  data: { title: 'API calls should be fun', content: '...but they rarely are' }
+}).then(res => console.log(res.data)).catch(err => console.error('Oops!', err));
+
+// After: "Oh, that's actually readable!"
+new Request('https://api.example.com')
+  .setMethod(EHttpMethod.Post)
+  .setEndpoint('/posts')
+  .addHeader('Authorization', `Bearer ${token}`)
+  .addHeader('X-API-Version', '2.0')
+  .addQueryParam('source', 'web')
+  .setBody({ 
+    title: 'API calls should be fun', 
+    content: '...and now they are!' 
+  })
+  .build()
+  .execute()
+  .then(data => console.log(data))
+  .catch(err => console.error('Still oops, but at least the code looks nice!', err));
 ```
 
-## Quick Start ⚡
+## ✨ Features That Will Make Your Day Better
 
-### Basic GET Request
+- **Chain All The Things**: Write requests that actually make sense when you read them
+- **TypeScript Love**: Full TypeScript support because `any`'s are scary
+- **Smart Retries**: Auto-retry failed requests without copy-pasting code everywhere
+- **Hook It Up**: Add success and error hooks like you're setting up event listeners
+- **Be Flexible**: Handle dates, objects, and arrays in headers/params without breaking a sweat
+- **Parameter Power**: Manage URL params, query params, and body params with equal ease
+- **Instance Control**: Bring your own Axios instance with custom configs
+- **Header Happiness**: Manage headers like a boss with easy get/set/remove operations
+- **Date Magic**: Automatic date formatting for query parameters and headers
+- **Bulk Operations**: Set multiple headers/params at once because your time is precious
+
+## 📦 Installation (It's Easy, Promise!)
+
+```bash
+npm install axios axios-wrapped
+```
+
+## ⚡ Quick Start (Even Quicker Than Instant Ramen)
 
 ```typescript
-import { AxiosRequestBuilder, EHttpMethod } from 'axios-wrapped';
+import { Request, EHttpMethod } from 'axios-wrapped';
 
-const response = await new AxiosRequestBuilder("https://api.example.com")
+// Fetch users without losing your will to live
+const users = await new Request('https://api.example.com')
   .setMethod(EHttpMethod.Get)
-  .setEndpoint("/users")
+  .setEndpoint('/users')
+  .addQueryParam('page', '1')
   .build()
   .execute();
 
-console.log(response.data);
+console.log(users); // Look ma, no response.data!
 ```
 
-## Core Concepts 🧠
+## 🧩 Core Concepts (Don't Worry, They're Simple)
 
-### Method Chaining
-
-Build requests through intuitive method chaining:
+### Method Chaining (Like LEGO, But For Code)
 
 ```typescript
-const request = new AxiosRequestBuilder("https://api.example.com")
+const builder = new Request('https://api.example.com')
   .setMethod(EHttpMethod.Post)
-  .setContentType("application/json")
-  .addHeader("Authorization", `Bearer ${token}`)
-  .setBody({ title: "New Post" });
+  .setContentType('application/json')
+  .addHeader('Authorization', `Bearer ${token}`)
+  .setBody({ message: "This is so much cleaner than a config object!" });
 ```
 
-### Hooks System
-
-Handle outcomes with hooks:
+### Parameter Magic (Different Kinds, Same Easy Syntax)
 
 ```typescript
-.addOnSuccessHook((response) => {
-  console.log("Success! Status:", response);
-  return response;
-})
-.addOnErrorHook(async (error, builder) => {  
-    await refreshToken();
-    builder.addHeader("Authorization", `Bearer ${newToken}`);
-    return { retry: true };
+// Query params (after the ?)
+builder.addQueryParam('include', 'details');
+builder.addQueryParam('limit', '10');
+
+// Multiple at once? No problem!
+builder.setQueryParams({
+  sort: 'desc',
+  fields: 'name,email'
 });
 ```
 
-## Comprehensive Usage Guide 📖
-
-### Request Configuration
-
-| Method               | Description                          | Example                                  |
-|----------------------|--------------------------------------|------------------------------------------|
-| `.setUrl()`          | Set base URL                         | `.setUrl("https://new.api")`             |
-| `.setEndpoint()`     | Set API endpoint path                | `.setEndpoint("/users/123")`             |
-| `.setMethod()`       | Set HTTP method                      | `.setMethod(EHttpMethod.Patch)`          |
-| `.setContentType()`  | Set Content-Type header shortcut     | `.setContentType("application/json")`    |
-
-### Headers Management
+### Date Formatting (Because Dates Are Hard)
 
 ```typescript
-// Single header
-.addHeader("X-API-Key", "12345")
+// "Give me all orders from last week"
+const lastWeek = new Date();
+lastWeek.setDate(lastWeek.getDate() - 7);
 
-// Multiple headers
-.setHeaders({
-  "Accept": "application/json",
-  "X-Request-ID": uuidv4()
-})
-
-// Key-value pairs array
-.setHeaders([{
-  key:"my-key",
-  value:"myValue"
-}])
-
-// Special types
-.addHeader("Expires", new Date()) // Auto-converted to ISO string
-.addHeader("Retry-After", 120) // Number converted to string
+builder.addQueryParam(
+  'createdAfter', 
+  lastWeek,
+  date => date.toISOString() // Format however you want!
+);
 ```
 
-### Query Parameters
+### Hooks (For When Things Go Right or Wrong)
+
+```typescript
+builder
+  .addOnSuccessHook(response => {
+    console.log('Woohoo! Status:', response.status);
+    return { retry: false }; // We're good!
+  })
+  .addOnErrorHook(async (error, builder) => {
+    console.error('Dang it:', error.message);
+    
+    // Token expired? No problem!
+    if (error.response?.status === 401) {
+      const newToken = await refreshToken();
+      builder.addHeader('Authorization', `Bearer ${newToken}`);
+      return { retry: true }; // Let's try again
+    }
+    return { retry: false }; // I give up
+  });
+```
+
+## 🛠️ Complete API Reference (Because You're a Power User)
+
+### URL & Endpoint Management
+
+```typescript
+const request = new Request('https://api.example.com');
+
+// Get/Set base URL
+request.getUrl(); // 'https://api.example.com'
+request.setUrl('https://api2.example.com');
+
+// Get/Set endpoint
+request.setEndpoint('/users');
+request.getEndpoint(); // '/users'
+
+// Get/Set HTTP method
+request.setMethod(EHttpMethod.Post);
+request.getMethod(); // EHttpMethod.Post
+```
+
+### Header Management (Because Headers Matter)
+
+```typescript
+// Content-Type shortcuts
+request.setContentType('application/json');
+request.getContentType(); // 'application/json'
+
+// Single header operations
+request.addHeader('Authorization', 'Bearer token123');
+request.getHeader('Authorization'); // 'Bearer token123'
+request.hasHeader('X-API-Key'); // false
+request.removeHeader('X-Temp-Header');
+
+// Bulk header operations
+request.setHeaders({
+  'X-Client': 'WebApp',
+  'Accept-Language': 'en-US'
+});
+
+// Date headers with custom formatting
+request.addHeader('Expires', new Date(), date => date.toUTCString());
+```
+
+### Parameter Management (For That URL Magic)
 
 ```typescript
 // Single parameter
-.addQueryParam("page", 2)
+request.addParam('id', '123');
+request.getParam('id'); // '123'
+request.hasParam('id'); // true
+request.removeParam('id');
 
-// Multiple values
-.addQueryParam("fields", ["id", "name", "email"])
+// Bulk parameters
+request.setParams({
+  userId: '456',
+  role: 'admin'
+});
 
-// Date handling
-.addQueryParam("createdBefore", new Date(), date => date.toISOString())
+// Date parameters
+request.addParam('expiresAt', new Date(), date => date.getTime().toString());
 ```
 
-### Request Body
+### Query Parameter Management (The ? Stuff)
 
 ```typescript
-.setBody({
-  title: "New Post",
-  content: "Lorem ipsum...",
-  tags: ["tech", "javascript"]
-})
+// Single query param
+request.addQueryParam('page', '2');
+request.getQueryParam('page'); // '2'
+request.hasQueryParam('page'); // true
+request.removeQueryParam('page');
+
+// Bulk query params
+request.setQueryParams({
+  limit: '10',
+  sort: 'desc'
+});
+
+// Array query params
+request.addQueryParam('tags', ['js', 'ts', 'axios']);
+
+// Date query params
+request.addQueryParam('createdBefore', new Date(), date => date.toISOString());
 ```
 
-## Advanced Examples 🚀
+### Body Management (Where the Meat Goes)
 
-### CRUD Operations
-
-**Create Resource:**
 ```typescript
-const newPost = await new AxiosRequestBuilder("https://api.example.com")
+// Set and check body
+request.setBody({ title: 'Hello World' });
+request.getBody(); // { title: 'Hello World' }
+request.hasBody(); // true
+```
+
+### Hooks (For Those Special Moments)
+
+```typescript
+// Success hook
+request.addOnSuccessHook(async (response) => {
+  console.log('Success!', response.status);
+  return { retry: false };
+});
+
+// Error hook with retry logic
+request.addOnErrorHook(async (error, builder) => {
+  if (error.response?.status === 429) {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    return { retry: true };
+  }
+  return { retry: false };
+});
+```
+
+### Execution (Make It So!)
+
+```typescript
+// Build with TypeScript generics
+interface User {
+  id: number;
+  name: string;
+}
+
+const executable = request.build<User>();
+
+// Execute and get typed response
+const user = await executable.execute();
+console.log(user.name); // TypeScript knows this is a string!
+```
+
+## 🔍 Common Request Patterns (Copy-Paste These, We Won't Judge)
+
+### Create a New Thing
+```typescript
+const post = await new Request('https://api.example.com')
   .setMethod(EHttpMethod.Post)
-  .setEndpoint("/posts")
+  .setEndpoint('/posts')
   .setBody({
-    title: "New Post",
-    content: "Lorem ipsum..."
-  })
-  .addHeader("Authorization", `Bearer ${token}`)
-  .build()
-  .execute();
-```
-
-**Update with Retry:**
-```typescript
-const updatedPost = await new AxiosRequestBuilder(apiUrl)
-  .setMethod(EHttpMethod.Patch)
-  .setEndpoint(`/posts/${postId}`)
-  .setBody({ title: "Updated Title" })
-  .addOnErrorHook(async (error, builder) => {
-    if (error.response?.status === 429) {
-      await delay(1000);
-      builder.addHeader("X-Retry-Attempt", retryCount++);
-      return { retry: retryCount <= 3 };
-    }
-    return { retry: false };
+    title: 'Axios Wrapped Rocks',
+    content: 'No, seriously, it does.',
   })
   .build()
   .execute();
 ```
 
-### Type-Safe Responses (TypeScript)
-
+### Get a Thing with Type Safety
 ```typescript
 interface User {
   id: number;
@@ -169,86 +288,76 @@ interface User {
   email: string;
 }
 
-const user = await new AxiosRequestBuilder(apiUrl)
+const user = await new Request('https://api.example.com')
   .setMethod(EHttpMethod.Get)
-  .setEndpoint("/users/123")
-  .build<User>()
+  .setEndpoint('/users/123')
+  .build<User>()  // Look ma, type safety!
   .execute();
 
-console.log(user.data.name); // Type-safe access
+console.log(user.name); // TypeScript knows this is a string!
 ```
 
-## Error Handling
-
-### Retry Strategies
-
+### Update a Thing with Automatic Retry
 ```typescript
-.addOnErrorHook((error, builder) => {
-  // Retry on network errors
-  if (!error.response) {
-    return { retry: true };
-  }
-  
-  // Don't retry on client errors
-  if (error.response.status >= 400 && error.response.status < 500) {
+const updatedPost = await new Request('https://api.example.com')
+  .setMethod(EHttpMethod.Patch)
+  .setEndpoint('/posts/123')
+  .setBody({ title: 'Updated Title' })
+  .addOnErrorHook(async (error, builder) => {
+    // Server having a bad day? Give it another chance
+    if (error.response?.status >= 500) {
+      // Wait a second before retry
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return { retry: true };
+    }
     return { retry: false };
-  }
-  
+  })
+  .build()
+  .execute();
+```
+
+### Delete a Thing
+```typescript
+await new Request('https://api.example.com')
+  .setMethod(EHttpMethod.Delete)
+  .setEndpoint('/posts/123')
+  .build()
+  .execute();
+
+console.log('Goodbye, post 123! 👋');
+```
+
+### Custom Axios Instance (When You Need Extra Control)
+```typescript
+// Create an Axios instance with custom settings
+const instance = axios.create({
+  timeout: 5000,
+  withCredentials: true
 });
+
+// Use it with your request
+const response = await new Request('https://api.example.com', instance)
+  .setMethod(EHttpMethod.Get)
+  .setEndpoint('/users')
+  .build()
+  .execute();
 ```
 
-## API Reference 📚
+## 💡 Pro Tips
 
-### Exported Members
+1. **Debug More Easily**: Each step in the chain is clear, making it easier to spot issues
+2. **Handle 401s Gracefully**: Use error hooks to refresh tokens and retry
+3. **Keep It DRY**: Create base request builders for common API patterns
+4. **Format Those Dates**: Use the date formatter to ensure consistent date formats
+5. **Type Everything**: Use TypeScript generics for type-safe responses
+6. **Bulk It Up**: Use `setHeaders` and `setParams` to configure multiple values at once
+7. **Hook It**: Add logging or analytics in your hooks for cross-cutting concerns
+8. **Check Before You Get**: Use `hasHeader`/`hasParam` to avoid undefined errors
 
-```typescript
-AxiosRequestBuilder // Main builder class
-EHttpMethod // Enum: Get, Post, Put, Delete, Patch, etc.
-```
-
-### Core Methods
-
-| Method               | Chainable | Description                              |
-|----------------------|-----------|------------------------------------------|
-| `.setMethod()`       | ✓         | Set HTTP method                          |
-| `.setEndpoint()`     | ✓         | Set API endpoint path                    |
-| `.addHeader()`       | ✓         | Add/modify single header                 |
-| `.setHeaders()`      | ✓         | Set multiple headers at once             |
-| `.addQueryParam()`   | ✓         | Add URL query parameter                  |
-| `.setBody()`         | ✓         | Set request payload                      |
-| `.addOnSuccessHook()`| ✓         | Add success callback                     |
-| `.addOnErrorHook()`  | ✓         | Add error handler with retry capability  |
-| `.build()`           | ✗         | Finalize configuration                   |
-| `.execute()`         | ✗         | Send request (returns Promise)           |
-
-## Best Practices
-
-1. **Reusable Builders:**
-```typescript
-function createAuthRequest(baseUrl: string, token: string) {
-  return new AxiosRequestBuilder(baseUrl)
-    .addHeader("Authorization", `Bearer ${token}`)
-    .setContentType("application/json");
-}
-```
-
-2. **Request Templates:**
-```typescript
-const jsonRequest = (url: string) => 
-  new AxiosRequestBuilder(url)
-    .setContentType("application/json")
-    .addHeader("Accept", "application/json");
-```
-
-3. **Centralized Error Handling:**
-```typescript
-function withDefaultRetry(builder: AxiosRequestBuilder) {
-  return builder.addOnErrorHook((error) => ({
-    retry: error.response?.status === 503
-  }));
-}
-```
-
-## License 📄
+## 📄 License
 
 MIT © [Sahil Multani]
+
+*Because coding HTTP requests should be fun, not painful.*
+
+
