@@ -1,6 +1,6 @@
 {
   "name": "axios-wrapped",
-  "version": "0.1.2-beta.2",
+  "version": "0.1.2-beta.3",
   "description": "A wrapped version of Axios with additional functionality",
   "author": "Sahil Multani",
   "keywords": [
