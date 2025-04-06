@@ -11,6 +11,14 @@
     "wrapped"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/api-ace/axios-wrapped"
+  },
+  "homepage": "https://github.com/api-ace/axios-wrapped#readme",
+  "bugs": {
+    "url": "https://github.com/api-ace/axios-wrapped/issues"
+  },
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
