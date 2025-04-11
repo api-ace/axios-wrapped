@@ -137,8 +137,8 @@ Be cautious when adding new dependencies. Consider:
 
 If you find a bug or have a suggestion, please create an issue using the appropriate template:
 
-- 🐛 [Bug Report](./ISSUE_TEMPLATE/bug_report.md)
-- 💡 [Feature Request](./ISSUE_TEMPLATE/feature_request.md)
+- 🐛 [Bug Report](.github//ISSUE_TEMPLATE/bug_report.md)
+- 💡 [Feature Request](.github//ISSUE_TEMPLATE/feature_request.md)
 
 ## 📜 Code of Conduct
 

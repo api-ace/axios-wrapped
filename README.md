@@ -354,6 +354,9 @@ const response = await new Request('https://api.example.com', instance)
 7. **Hook It**: Add logging or analytics in your hooks for cross-cutting concerns
 8. **Check Before You Get**: Use `hasHeader`/`hasParam` to avoid undefined errors
 
+## 👨‍💻 Contributing
+We welcome contributions from the community! Check out our [CONTRIBUTING.md](CONTRIBUTING.md) file for guidelines on how to help improve axios-wrapped.
+
 ## 📄 License
 
 MIT © [Sahil Multani]
