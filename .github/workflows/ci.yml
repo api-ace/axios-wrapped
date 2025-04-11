@@ -21,6 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version_changed: ${{ steps.check.outputs.version_changed }}
+      version: ${{ steps.get_version.outputs.version }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -32,6 +33,12 @@ jobs:
           git diff HEAD^ HEAD package.json | grep '"version":' && \
           echo "version_changed=true" >> $GITHUB_OUTPUT || \
           echo "version_changed=false" >> $GITHUB_OUTPUT
+      - id: get_version
+        name: Get package version
+        if: steps.check.outputs.version_changed == 'true'
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
   
   publish:
     needs: check-version
@@ -48,3 +55,11 @@ jobs:
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+      # Create and push tag
+      - name: Create Git tag
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git tag -a v${{ needs.check-version.outputs.version }} -m "Release v${{ needs.check-version.outputs.version }}"
+          git push origin v${{ needs.check-version.outputs.version }}
