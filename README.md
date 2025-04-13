@@ -365,7 +365,6 @@ const response = await new Request('https://api.example.com', instance)
 8. **Check Before You Get**: Use `hasHeader`/`hasParam` to avoid undefined errors
 
 ## 👨‍💻 Contributing
-## 👨‍💻 Contributing
 Got ideas to make `axios-wrapped` even cooler? We’re open to contributions—jump in and join the fun! 🎉 See [CONTRIBUTING.md](./CONTRIBUTING.md).
 ## 📄 License
 
