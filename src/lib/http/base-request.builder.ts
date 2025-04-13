@@ -19,12 +19,15 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
   protected params: Map<string, string>;
   protected query: Map<string, string | string[]>;
   protected body: unknown;
-  protected successHooks: Array<
-    (response: AxiosResponse, builder: IRequestBuilder) => Promise<IHookResult>
-  >;
-  protected errorHooks: Array<
-    (error: AxiosError, builder: IRequestBuilder, nextRetry?: boolean) => Promise<IHookResult>
-  >;
+  protected successHooks: ((
+    response: AxiosResponse,
+    builder: IRequestBuilder,
+  ) => Promise<IHookResult>)[];
+  protected errorHooks: ((
+    error: AxiosError,
+    builder: IRequestBuilder,
+    nextRetry?: boolean,
+  ) => Promise<IHookResult>)[];
 
   constructor(url?: string) {
     this.initialize();
@@ -59,7 +62,7 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
   }
 
   public getContentType(): string {
-    return this.headers.get(CONTENT_TYPE) ?? null;
+    return this.headers.get(CONTENT_TYPE);
   }
 
   public setContentType(mimeType: string): IRequestBuilder {
