@@ -2,7 +2,7 @@
 
 All notable changes to `axios-wrapped` will be documented in this file.
 
-## [0.1.2-beta.3] - 2025-04-12
+## [0.1.3-beta.1] - 2025-04-13
 
 ### 💡 Highlights for Developers
 
