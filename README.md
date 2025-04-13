@@ -115,7 +115,17 @@ builder.addQueryParam(
   date => date.toISOString() // Format however you want!
 );
 ```
+### Request Cancellation (Stop It Right Now!)
+Sometimes you need to pull the plug on a request—like when a user navigates away or a timeout kicks in. Use `abort()` to cancel a request before it completes.
 
+```typescript
+const builder = new Request('https://api.example.com')
+  .setEndpoint('/slow-endpoint')
+  .build();
+
+builder.execute();
+setTimeout(() => builder.abort(), 2000); // Cancel after 2 seconds
+```
 ### Hooks (For When Things Go Right or Wrong)
 
 ```typescript
@@ -355,8 +365,8 @@ const response = await new Request('https://api.example.com', instance)
 8. **Check Before You Get**: Use `hasHeader`/`hasParam` to avoid undefined errors
 
 ## 👨‍💻 Contributing
-We welcome contributions from the community! Check out our [CONTRIBUTING.md](CONTRIBUTING.md) file for guidelines on how to help improve axios-wrapped.
-
+## 👨‍💻 Contributing
+Got ideas to make `axios-wrapped` even cooler? We’re open to contributions—jump in and join the fun! 🎉 See [CONTRIBUTING.md](./CONTRIBUTING.md).
 ## 📄 License
 
 MIT © [Sahil Multani]

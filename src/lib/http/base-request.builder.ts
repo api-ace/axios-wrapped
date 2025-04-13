@@ -1,4 +1,10 @@
-import { CONTENT_TYPE, EMPTY_STR } from '../../constants';
+import {
+  CONTENT_TYPE,
+  EMPTY_STR,
+  INVALID_HEADERS_FORMAT_ERROR,
+  INVALID_NAME_TYPE_ERROR,
+  INVALID_PARAMS_FORMAT_ERROR,
+} from '../../constants';
 import { EHttpMethod } from '../../enums';
 import { TypeMismatchException } from '../../exceptions';
 import { IExecutable, IHookResult, IKeyValue, IRequestBuilder } from '../../interfaces';
@@ -13,12 +19,15 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
   protected params: Map<string, string>;
   protected query: Map<string, string | string[]>;
   protected body: unknown;
-  protected successHooks: Array<
-    (response: AxiosResponse, builder: IRequestBuilder) => Promise<IHookResult>
-  >;
-  protected errorHooks: Array<
-    (error: AxiosError, builder: IRequestBuilder, nextRetry?: boolean) => Promise<IHookResult>
-  >;
+  protected successHooks: ((
+    response: AxiosResponse,
+    builder: IRequestBuilder,
+  ) => Promise<IHookResult>)[];
+  protected errorHooks: ((
+    error: AxiosError,
+    builder: IRequestBuilder,
+    nextRetry?: boolean,
+  ) => Promise<IHookResult>)[];
 
   constructor(url?: string) {
     this.initialize();
@@ -53,7 +62,7 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
   }
 
   public getContentType(): string {
-    return this.headers.get(CONTENT_TYPE) ?? null;
+    return this.headers.get(CONTENT_TYPE);
   }
 
   public setContentType(mimeType: string): IRequestBuilder {
@@ -83,7 +92,7 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
       return this;
     }
     if (typeof name !== 'string') {
-      throw new TypeMismatchException("'name' should be type of string");
+      throw new TypeMismatchException(INVALID_NAME_TYPE_ERROR);
     }
     this.headers.set(name.toLowerCase(), this.normalizeValue(value, formatter) as string);
     return this;
@@ -122,9 +131,7 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
       }
       return this;
     }
-    throw new TypeMismatchException(
-      "'headers' should be Array of key-value pairs, Map, object as dictionary",
-    );
+    throw new TypeMismatchException(INVALID_HEADERS_FORMAT_ERROR);
   }
 
   public getParam(name: string): string {
@@ -150,7 +157,7 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
       return this;
     }
     if (typeof name !== 'string') {
-      throw new TypeMismatchException("'name' should be type of string");
+      throw new TypeMismatchException(INVALID_NAME_TYPE_ERROR);
     }
     this.params.set(name, this.normalizeValue(value, formatter) as string);
     return this;
@@ -189,9 +196,7 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
       }
       return this;
     }
-    throw new TypeMismatchException(
-      "'params' should be Array of key-value pairs, Map, object as dictionary",
-    );
+    throw new TypeMismatchException(INVALID_PARAMS_FORMAT_ERROR);
   }
 
   public getQueryParam(name: string): string | string[] {
@@ -224,7 +229,7 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
       return this;
     }
     if (typeof name !== 'string') {
-      throw new TypeMismatchException("'name' should be type of string");
+      throw new TypeMismatchException(INVALID_NAME_TYPE_ERROR);
     }
 
     const record = this.query.get(name);
@@ -265,9 +270,7 @@ export abstract class BaseRequestBuilder implements IRequestBuilder {
       }
       return this;
     }
-    throw new TypeMismatchException(
-      "'params' should be Array of key-value pairs, Map, object as dictionary",
-    );
+    throw new TypeMismatchException(INVALID_PARAMS_FORMAT_ERROR);
   }
 
   public getBody<TBody>(): TBody {

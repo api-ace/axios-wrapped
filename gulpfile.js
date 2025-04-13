@@ -8,6 +8,7 @@ gulp.task('default', async function () {
 const clear = gulp.task('clear', async function () {
   await fs.removeSync("./tsconfig.tsbuildinfo")
   await fs.emptyDir('./dist/')
+  await fs.remove(".rollup.cache")
 });
 
 export {

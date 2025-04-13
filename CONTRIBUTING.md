@@ -64,18 +64,55 @@ npm run lint:fix
    git push origin feature/your-feature-name
    ```
 6. Create a Pull Request from your fork to the main repository
+## Commit Messages
 
-### Commit Messages
+Use [Conventional Commits](https://www.conventionalcommits.org/) for clarity:
 
-Please follow these guidelines for commit messages:
+### Format
+```
+<type>(<scope>): <description>
+```
 
-- Use the present tense ("Add feature" not "Added feature")
-- Use the imperative mood ("Move cursor to..." not "Moves cursor to...")
-- Start with a verb (Add, Fix, Update, Refactor, etc.)
-- Reference issues and pull requests when relevant
+### Types
+- `feat`: A new feature
+- `fix`: A bug fix
+- `docs`: Documentation changes
+- `style`: Code style changes (formatting, missing semicolons, etc.)
+- `refactor`: Code changes that neither fix bugs nor add features
+- `perf`: Code changes that improve performance
+- `test`: Adding or updating tests
+- `chore`: Changes to the build process, tooling, etc.
+- `ci`: Changes to CI configuration files and scripts
 
-Example: `Fix: prevent request build errors when URL is missing`
+### Scope
+Optional field specifying the module your change affects:
+- `config`: Configuration-related changes
+- `core`: Core library functionality
+- `auth`: Authentication functionality
+- `cache`: Caching mechanisms
+- `interceptors`: Request/response interceptors
+- `types`: TypeScript type definitions
+- `utils`: Utility functions
 
+### Examples
+```
+feat(interceptors): add request timing interceptor
+fix(core): prevent duplicate headers on retry
+docs(api): clarify timeout configuration options
+refactor(utils): simplify URL parameter encoding
+chore(deps): migrate from Jest to Vitest
+test(cache): add tests for cache invalidation
+perf(core): optimize response data handling
+ci(github): add Node 20 to test matrix
+```
+
+### Linking Issues
+Reference issues or PRs with `#123` or keywords:
+```
+fix(auth): resolve token refresh race condition
+
+Fixes #87
+```
 ## 🔍 Pull Request Process
 
 1. Update the README.md and documentation with details of changes, if applicable
