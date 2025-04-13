@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+
 /**
  * Gets the first element of array
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function first<T>(array: Array<T> | null | undefined): T | undefined {
   if (isNil(array) || array.length === 0) return undefined;
   return array[0];
@@ -49,7 +50,6 @@ export function isObject(value: unknown): value is Record<string, unknown> {
 /**
  * Creates an array of values by running each element through iteratee
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function map<T, R>(
   collection: Array<T> | Record<string, T> | null | undefined,
   iteratee: (value: T, index: number | string, collection: Array<T> | Record<string, T>) => R,
@@ -113,7 +113,6 @@ export function isPrimitive(value: unknown): value is string | number | boolean 
 /**
  * Filters elements of array that the predicate returns truthy for
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function filter<T>(
   collection: Array<T> | Record<string, T> | null | undefined,
   predicate: (
