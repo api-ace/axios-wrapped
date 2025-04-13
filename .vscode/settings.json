@@ -16,8 +16,11 @@
         "./"
     ],
     "[typescript]": {
-        "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.formatOnSave": true
     },
-    "prettier.prettierPath": "./node_modules/prettier"
+    "prettier.prettierPath": "./node_modules/prettier",
+    "cSpell.words": [
+        "sonarjs"
+    ]
 }

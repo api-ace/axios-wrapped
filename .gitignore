@@ -3,3 +3,4 @@ dist
 docs
 .rollup.cache
 tsconfig.tsbuildinfo
+test/unit/*.js

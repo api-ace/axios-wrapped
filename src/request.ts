@@ -6,43 +6,42 @@ import { isNil, isNilOrEmpty, map, mapToObject } from './utils';
 
 export class Request extends BaseRequestBuilder {
   private instance: AxiosInstance;
+  private abortController: AbortController;
 
   constructor(url?: string, instance?: AxiosInstance) {
     super(url);
     this.init(instance);
   }
 
+  // todo: make retries many times as possible with default configurable max attempts config
   public build<TRes = unknown>(): IExecutable<TRes> {
     const execute = async (): Promise<TRes> => {
-      let data = null;
-      let retry = false;
       try {
         const response = await this.createRequestObject();
 
         if (await this.callSuccessHooks(response)) {
           return await this.buildAndExecWithoutRetry<TRes>();
-          }
         }
-        data = response.data;
+
+        return response.data as TRes;
       } catch (ex) {
         if (await this.callErrorHooks(ex, true)) {
           return await this.buildAndExecWithoutRetry<TRes>();
+        }
       }
-      return data as TRes;
     };
-    return { execute };
+
+    const abort = (): void => {
+      this.abortController.abort();
+    };
+
+    return { execute, abort };
   }
 
+  //todo: remove this and make `build()` self calling for retry
   private async buildAndExecWithoutRetry<TRes = unknown>(): Promise<TRes> {
-    let url = this.url;
-    if (!isNilOrEmpty(this.endpoint)) {
-      url += this.endpoint;
-    }
-    for (const [key, value] of this.params) {
-      url = url.replace(PARAM_PREFIX + key, value);
-    }
+    let data: unknown = null;
 
-    let data = null;
     try {
       const response = await this.createRequestObject();
 
@@ -60,6 +59,7 @@ export class Request extends BaseRequestBuilder {
 
   private init(instance?: AxiosInstance): void {
     this.instance = instance ?? axios.create();
+    this.abortController = new AbortController();
   }
 
   private buildUrl = (): string => {
@@ -105,6 +105,7 @@ export class Request extends BaseRequestBuilder {
       method: this.method.toString(),
       headers: this.buildHeaders(),
       params: this.buildQueryParams(),
+      signal: this.abortController.signal,
       data: this.body ?? undefined,
     });
   };
