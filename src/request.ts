@@ -1,7 +1,8 @@
 import { PARAM_PREFIX } from './constants';
 import { IExecutable } from './interfaces';
-import { axios, AxiosInstance, AxiosResponse, BaseRequestBuilder } from './lib';
-import { isNil, isNilOrEmpty, mapToObject } from './utils';
+import { axios, AxiosError, AxiosInstance, AxiosResponse, BaseRequestBuilder } from './lib';
+import { resolveAllStrict } from './tools';
+import { isNil, isNilOrEmpty, map, mapToObject } from './utils';
 
 export class Request extends BaseRequestBuilder {
   private instance: AxiosInstance;
@@ -18,23 +19,14 @@ export class Request extends BaseRequestBuilder {
       try {
         const response = await this.createRequestObject();
 
-        for (const fn of this.successHooks) {
-          const sRes = await fn(response, this);
-          if (!isNil(sRes)) {
-            retry = retry || !!sRes?.retry;
+        if (await this.callSuccessHooks(response)) {
+          return await this.buildAndExecWithoutRetry<TRes>();
           }
         }
         data = response.data;
       } catch (ex) {
-        for (const fn of this.errorHooks) {
-          const eRes = await fn(ex, this, true);
-          if (!isNil(eRes)) {
-            retry = retry || !!eRes.retry;
-          }
-        }
-      }
-      if (retry) {
-        data = await this.buildAndExecWithoutRetry<TRes>();
+        if (await this.callErrorHooks(ex, true)) {
+          return await this.buildAndExecWithoutRetry<TRes>();
       }
       return data as TRes;
     };
@@ -54,14 +46,10 @@ export class Request extends BaseRequestBuilder {
     try {
       const response = await this.createRequestObject();
 
-      for (const fn of this.successHooks) {
-        await fn(response, this);
-      }
+      await this.callSuccessHooks(response);
       data = response.data;
     } catch (ex) {
-      for (const fn of this.errorHooks) {
-        await fn(ex, this, false);
-      }
+      await this.callErrorHooks(ex, false);
     }
     return data as TRes;
   }
@@ -83,6 +71,27 @@ export class Request extends BaseRequestBuilder {
       url = url.replace(PARAM_PREFIX + key, value);
     }
     return url;
+  };
+
+  /**
+   * @returns A Promise boolean or rejects with an Error
+   */
+  private readonly callSuccessHooks = async (response: AxiosResponse): Promise<boolean> => {
+    const sRes = await resolveAllStrict(map(this.successHooks, (fn) => fn(response, this)));
+
+    return sRes.some((res) => !isNil(res) && !!res.retry);
+  };
+
+  /**
+   * @returns A Promise boolean or rejects with an Error
+   */
+  private readonly callErrorHooks = async (
+    error: AxiosError,
+    shouldRetry: boolean,
+  ): Promise<boolean> => {
+    const eRes = await resolveAllStrict(map(this.errorHooks, (fn) => fn(error, this, shouldRetry)));
+
+    return eRes.some((res) => !isNil(res) && res.retry);
   };
 
   private readonly buildHeaders = (): Record<string, string> => mapToObject(this.headers);
