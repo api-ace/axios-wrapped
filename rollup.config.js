@@ -44,6 +44,7 @@ const jsConfig = {
       declaration: false,
       outDir: "dist",
       sourceMap: true,
+      declarationMap: false
     }),
     terser({
       mangle: {
